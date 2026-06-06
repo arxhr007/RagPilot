@@ -165,6 +165,18 @@ h2 {
   gap: 8px;
   margin-top: 12px;
 }
+.toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--blue-dark);
+  font-size: 12px;
+}
+.toggle-row input {
+  width: auto;
+  accent-color: var(--blue);
+}
 input {
   min-width: 0;
   width: 100%;

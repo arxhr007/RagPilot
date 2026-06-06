@@ -266,6 +266,7 @@ export default function App() {
   const [answer, setAnswer] = useState<ChatResponse | null>(null);
   const [url, setUrl] = useState("");
   const [maxPages, setMaxPages] = useState(4);
+  const [usePlaywright, setUsePlaywright] = useState(false);
   const [question, setQuestion] = useState("");
   const [routeOverride, setRouteOverride] = useState<RouteOverride>("auto");
   const [busy, setBusy] = useState(false);
@@ -394,11 +395,15 @@ export default function App() {
                 onChange={(event) => setMaxPages(Number(event.target.value))}
                 title="Max pages"
               />
-              <button disabled={!url || busy} onClick={() => run(() => ingestUrl(url, maxPages), acceptIngest)}>
+              <button disabled={!url || busy} onClick={() => run(() => ingestUrl(url, maxPages, usePlaywright), acceptIngest)}>
                 {busy ? <Loader2 className="spin" size={16} /> : <Search size={16} />}
                 Ingest
               </button>
             </div>
+            <label className="toggle-row">
+              <input type="checkbox" checked={usePlaywright} onChange={(event) => setUsePlaywright(event.target.checked)} />
+              <span>Use Playwright for JS-heavy pages</span>
+            </label>
             <div className="demo-row">
               {datasetId && (
                 <button className="ghost-button" onClick={() => navigate("/chat")}>

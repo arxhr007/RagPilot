@@ -246,3 +246,40 @@ def test_upload_response_includes_rag_classification_metadata(monkeypatch):
     assert analysis["rag_classification_summary"]["counts"]["sql"] >= 1
     assert any(item["classifier"] == "heuristic" for item in assignments)
     assert all("primary_rag" in item and "secondary_rags" in item and "signals" in item for item in assignments)
+
+
+def test_web_ingestion_recursively_crawls_same_domain(monkeypatch):
+    import app.ingestion.web as web
+
+    pages = {
+        "https://example.test/": '<html><head><title>Home</title></head><body>Home page text <a href="/about">About</a></body></html>',
+        "https://example.test/about": '<html><head><title>About</title></head><body>About page text <a href="/team">Team</a></body></html>',
+        "https://example.test/team": "<html><head><title>Team</title></head><body>Team page text</body></html>",
+    }
+
+    monkeypatch.setattr(web, "_sitemap_urls", lambda *args, **kwargs: [])
+    monkeypatch.setattr(web, "_fetch_requests", lambda url, session: pages[url])
+    record, chunks = web.ingest_url(dataset_id="web1", url="https://example.test", max_pages=3)
+    urls = {chunk.source.url for chunk in chunks}
+    assert record["recursive"] is True
+    assert record["pages"] == 3
+    assert "https://example.test/about" in urls
+    assert "https://example.test/team" in urls
+
+
+def test_web_ingestion_uses_playwright_when_requested(monkeypatch):
+    import app.ingestion.web as web
+
+    called = {"playwright": False}
+
+    monkeypatch.setattr(web, "_sitemap_urls", lambda *args, **kwargs: [])
+
+    def fake_playwright(url):
+        called["playwright"] = True
+        return "<html><head><title>JS Page</title></head><body>Rendered JavaScript content</body></html>"
+
+    monkeypatch.setattr(web, "_fetch_playwright", fake_playwright)
+    record, chunks = web.ingest_url(dataset_id="web2", url="https://example.test", max_pages=1, use_playwright=True)
+    assert called["playwright"] is True
+    assert record["use_playwright"] is True
+    assert chunks

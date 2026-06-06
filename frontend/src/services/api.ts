@@ -21,12 +21,12 @@ export async function uploadFiles(files: FileList): Promise<IngestResponse> {
   );
 }
 
-export async function ingestUrl(url: string, maxPages: number): Promise<IngestResponse> {
+export async function ingestUrl(url: string, maxPages: number, usePlaywright = false): Promise<IngestResponse> {
   return parse<IngestResponse>(
     await fetch(`${API_BASE}/api/ingest/url`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, max_pages: maxPages, use_playwright: false }),
+      body: JSON.stringify({ url, max_pages: maxPages, use_playwright: usePlaywright }),
     }),
   );
 }
