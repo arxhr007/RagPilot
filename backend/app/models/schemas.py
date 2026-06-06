@@ -71,6 +71,7 @@ class DatasetAnalysis(BaseModel):
     graph: dict[str, Any] = Field(default_factory=dict)
     method_assignments: list[dict[str, Any]] = Field(default_factory=list)
     route_policy_summary: str = ""
+    token_metrics: dict[str, Any] = Field(default_factory=dict)
 
 
 class Architecture(BaseModel):
@@ -109,6 +110,7 @@ class ChatResponse(BaseModel):
     graph: dict[str, Any] | None = None
     retrievers_used: list[RagStrategy] = Field(default_factory=list)
     retrievers_skipped: list[dict[str, str]] = Field(default_factory=list)
+    context_budget: dict[str, Any] = Field(default_factory=dict)
 
 
 class UrlIngestRequest(BaseModel):

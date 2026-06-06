@@ -33,6 +33,24 @@ def _refresh(dataset_id: str):
     return run_dataset_graph(dataset)
 
 
+def _ingest_local_file(dataset, path: Path, display_name: str | None = None):
+    kind = detect_file_kind(path)
+    record = make_input_record(Path(display_name or path.name), kind)
+    input_id = record["id"]
+    dataset.inputs.append(record)
+    if kind == "table":
+        table = ingest_table_file(dataset.id, input_id, path)
+        dataset.tables.append(table)
+        dataset.segments.append(segment_table_input(display_name or path.name, input_id, table.table_name, table.columns, table.row_count))
+    elif kind in {"pdf", "docx", "text"}:
+        chunks, segments = ingest_document_file(dataset.id, input_id, path)
+        dataset.segments.extend(segments)
+        dataset.tables.extend(load_text_tables(dataset.id, display_name or path.name, segments))
+        dataset.chunks.extend(chunks)
+    else:
+        record["warning"] = "Unsupported file type was stored but not indexed."
+
+
 @router.post("/upload")
 async def upload(files: list[UploadFile] = File(...)):
     dataset = store.create("Uploaded Dataset")
@@ -58,6 +76,21 @@ async def upload(files: list[UploadFile] = File(...)):
         else:
             record["warning"] = "Unsupported file type was stored but not indexed."
 
+    dataset = _refresh(dataset.id)
+    return {
+        "dataset_id": dataset.id,
+        "analysis": dataset.analysis,
+        "architecture": dataset.architecture,
+    }
+
+
+@router.post("/demo/universal")
+async def demo_universal():
+    demo_path = Path(__file__).resolve().parents[3] / "examples" / "universal_all_rag_demo.txt"
+    if not demo_path.exists():
+        raise HTTPException(status_code=404, detail="Universal demo dataset was not found.")
+    dataset = store.create("Universal Multi-RAG Demo")
+    _ingest_local_file(dataset, demo_path, "universal_all_rag_demo.txt")
     dataset = _refresh(dataset.id)
     return {
         "dataset_id": dataset.id,

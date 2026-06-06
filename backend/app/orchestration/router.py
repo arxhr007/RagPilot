@@ -87,6 +87,28 @@ def _best_table(dataset: Dataset, question: str):
     return best
 
 
+def _estimate_context_budget(dataset: Dataset, sources, sql_rows) -> dict:
+    dataset_chars = sum(len(chunk.text) for chunk in dataset.chunks)
+    segment_chars = sum(len(segment.text) for segment in dataset.segments)
+    table_chars = sum(
+        len(" ".join(table.columns)) + (table.row_count * max(len(table.columns), 1) * 12)
+        for table in dataset.tables
+    )
+    evidence_chars = sum(len(source.text) for source in sources)
+    if sql_rows:
+        evidence_chars += sum(len(" ".join(str(value) for value in row.values())) for row in sql_rows)
+    dataset_tokens = max(0, (max(dataset_chars, segment_chars) + table_chars + 3) // 4)
+    evidence_tokens = max(0, (evidence_chars + 3) // 4)
+    saved_tokens = max(0, dataset_tokens - evidence_tokens)
+    reduction = round((saved_tokens / dataset_tokens) * 100, 1) if dataset_tokens else 0
+    return {
+        "estimated_dataset_tokens": dataset_tokens,
+        "estimated_evidence_tokens": evidence_tokens,
+        "estimated_saved_tokens": saved_tokens,
+        "reduction_percent": reduction,
+    }
+
+
 def answer_question(dataset: Dataset, question: str, route_override: str = "auto") -> ChatResponse:
     understood = understand_query(question, dataset_vocabulary(dataset))
     route, confidence, reason = classify_query(dataset, understood.normalized, route_override)
@@ -194,4 +216,5 @@ def answer_question(dataset: Dataset, question: str, route_override: str = "auto
         graph=graph,
         retrievers_used=list(dict.fromkeys(retrievers_used)),
         retrievers_skipped=retrievers_skipped,
+        context_budget=_estimate_context_budget(dataset, reranked_sources, sql_rows),
     )

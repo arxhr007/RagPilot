@@ -86,6 +86,13 @@ def analyze_dataset(dataset: Dataset) -> DatasetAnalysis:
         }
         for segment in dataset.segments
     ]
+    dataset_chars = sum(len(getattr(chunk, "text", "")) for chunk in dataset.chunks)
+    segment_chars = sum(len(segment.text) for segment in dataset.segments)
+    table_chars = sum(
+        len(" ".join(table.columns)) + (table.row_count * max(len(table.columns), 1) * 12)
+        for table in dataset.tables
+    )
+    estimated_dataset_tokens = max(1, (max(dataset_chars, segment_chars) + table_chars + 3) // 4) if (dataset_chars or segment_chars or table_chars) else 0
 
     return DatasetAnalysis(
         dataset_id=dataset.id,
@@ -122,6 +129,11 @@ def analyze_dataset(dataset: Dataset) -> DatasetAnalysis:
         graph=dataset.graph,
         method_assignments=method_assignments,
         route_policy_summary="Auto routing uses SQL for reliable tables, keyword for exact names/acronyms, graph for relationships, hierarchical for long sections, semantic for factual prose, and hybrid when evidence spans modes.",
+        token_metrics={
+            "estimated_dataset_tokens": estimated_dataset_tokens,
+            "estimated_chunk_count": len(dataset.chunks),
+            "estimated_table_tokens": (table_chars + 3) // 4 if table_chars else 0,
+        },
     )
 
 

@@ -54,6 +54,11 @@ export interface DatasetAnalysis {
   graph: { nodes?: Array<Record<string, unknown>>; edges?: Array<Record<string, unknown>> };
   method_assignments: Array<Record<string, unknown>>;
   route_policy_summary: string;
+  token_metrics?: {
+    estimated_dataset_tokens?: number;
+    estimated_chunk_count?: number;
+    estimated_table_tokens?: number;
+  };
 }
 
 export interface Architecture {
@@ -92,4 +97,10 @@ export interface ChatResponse {
   graph?: { nodes: Array<Record<string, unknown>>; edges: Array<Record<string, unknown>> } | null;
   retrievers_used: RagStrategy[];
   retrievers_skipped: Array<Record<string, string>>;
+  context_budget?: {
+    estimated_dataset_tokens?: number;
+    estimated_evidence_tokens?: number;
+    estimated_saved_tokens?: number;
+    reduction_percent?: number;
+  };
 }
