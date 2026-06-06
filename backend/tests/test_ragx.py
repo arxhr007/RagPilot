@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from app.analysis.analyzer import analyze_dataset
+from app.analysis.rag_classifier import classify_segments_for_rag
 from app.analysis.segmenter import segment_text
 from app.ingestion.files import detect_file_kind
 from app.ingestion.table_extract import load_text_tables
@@ -191,3 +192,57 @@ def test_point_lookup_without_confirmed_fact_is_not_raw_dump():
     answer = client.post("/api/chat", json={"dataset_id": dataset_id, "question": "who is the chief wizard?"}).json()
     assert "=== URL" not in answer["answer"]
     assert "I could not find" in answer["answer"]
+
+
+def test_casual_chat_skips_retrieval():
+    client, dataset_id = _upload_fixture("examples/universal_all_rag_demo.txt")
+    answer = client.post("/api/chat", json={"dataset_id": dataset_id, "question": "hi"}).json()
+    assert answer["query_intent"] == "casual_chat"
+    assert answer["answer_validation"]["status"] == "casual_chat"
+    assert answer["candidate_count"] == 0
+    assert "uploaded data" in answer["answer"]
+
+
+def test_big_universal_fixture_exercises_all_rag_modes():
+    text = Path("examples/big_universal_ragx_test_data.txt").read_text(encoding="utf-8")
+    segments = classify_segments_for_rag(segment_text(text, "big_universal_ragx_test_data.txt", "big"), use_openai=False)
+    modes = {segment.rag_module for segment in segments}
+    assert {"semantic", "sql", "graph", "keyword", "hierarchical"}.issubset(modes)
+    assert all(segment.metadata.get("primary_rag") == segment.rag_module for segment in segments)
+    assert all(segment.metadata.get("classifier") == "heuristic" for segment in segments)
+
+
+def test_big_universal_fixture_loads_reliable_text_tables_only(tmp_path, monkeypatch):
+    import app.ingestion.table_extract as table_extract
+
+    monkeypatch.setattr(table_extract, "SQLITE_DIR", tmp_path)
+    text = Path("examples/big_universal_ragx_test_data.txt").read_text(encoding="utf-8")
+    segments = classify_segments_for_rag(segment_text(text, "big_universal_ragx_test_data.txt", "big"), use_openai=False)
+    tables = load_text_tables("big_dataset", "big_universal_ragx_test_data.txt", segments)
+    names = " ".join(table.source_name for table in tables)
+    assert len(tables) >= 5
+    assert all(table.row_count >= 2 for table in tables)
+    assert "big_universal" in names
+
+
+def test_rag_classifier_falls_back_when_ai_unavailable(monkeypatch):
+    import app.analysis.rag_classifier as rag_classifier
+
+    monkeypatch.setattr(rag_classifier, "_classify_with_openai", lambda segments: {})
+    text = "Overview\nThis narrative explains a product strategy without a table."
+    segments = rag_classifier.classify_segments_for_rag(segment_text(text, "demo.txt", "demo"), use_openai=True)
+    assert segments[0].metadata["classifier"] == "heuristic"
+    assert segments[0].metadata["primary_rag"] == segments[0].rag_module
+
+
+def test_upload_response_includes_rag_classification_metadata(monkeypatch):
+    import app.analysis.rag_classifier as rag_classifier
+
+    monkeypatch.setattr(rag_classifier, "OPENAI_API_KEY", "")
+    client, dataset_id = _upload_fixture("examples/big_universal_ragx_test_data.txt")
+    analysis = client.get(f"/api/datasets/{dataset_id}/analysis").json()
+    assignments = analysis["method_assignments"]
+    assert assignments
+    assert analysis["rag_classification_summary"]["counts"]["sql"] >= 1
+    assert any(item["classifier"] == "heuristic" for item in assignments)
+    assert all("primary_rag" in item and "secondary_rags" in item and "signals" in item for item in assignments)

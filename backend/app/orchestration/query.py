@@ -24,6 +24,12 @@ class QueryUnderstanding:
     qualifier: str = ""
 
 
+CASUAL_CHAT_RE = re.compile(
+    r"^\s*(hi|hello|hey|yo|sup|thanks|thank you|ok|okay|cool|nice|good morning|good evening|good afternoon|bye|goodbye)[!?.\s]*$",
+    re.I,
+)
+
+
 def normalize_query(question: str) -> str:
     normalized = re.sub(r"\s+", " ", question.strip())
     for wrong, right in TYPO_MAP.items():
@@ -35,6 +41,8 @@ def understand_query(question: str, vocabulary: list[str] | None = None) -> Quer
     normalized = normalize_query(question)
     lower = normalized.lower()
     intent = "factual"
+    if CASUAL_CHAT_RE.match(normalized):
+        return QueryUnderstanding(question, normalized, normalized, "casual_chat", "", "", "")
     if re.search(r"\b(who is|who's|current|principal|ceo|cto|founder|hod|head|chairman|director|manager|speaker|organizer)\b", lower):
         intent = "point_lookup"
     if re.search(r"\b(list|all|show all|which|speakers|people|members|departments|products|events)\b", lower):

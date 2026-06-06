@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from collections import Counter
+
 from app.models.schemas import Architecture, DatasetAnalysis
+from app.analysis.rag_classifier import classification_counts
 from app.store import Dataset
 
 
@@ -80,12 +83,18 @@ def analyze_dataset(dataset: Dataset) -> DatasetAnalysis:
             "source_name": segment.source_name,
             "segment_type": segment.segment_type,
             "method": segment.rag_module,
+            "primary_rag": segment.metadata.get("primary_rag", segment.rag_module),
+            "secondary_rags": segment.metadata.get("secondary_rags", []),
             "confidence": segment.confidence,
             "reason": " ".join(segment.reasons),
+            "classifier": segment.metadata.get("classifier", "heuristic"),
+            "signals": segment.metadata.get("signals", []),
+            "decision_reason": segment.metadata.get("decision_reason", " ".join(segment.reasons)),
             "table_name": segment.table_name,
         }
         for segment in dataset.segments
     ]
+    rag_counts = classification_counts(dataset.segments)
     dataset_chars = sum(len(getattr(chunk, "text", "")) for chunk in dataset.chunks)
     segment_chars = sum(len(segment.text) for segment in dataset.segments)
     table_chars = sum(
@@ -129,6 +138,13 @@ def analyze_dataset(dataset: Dataset) -> DatasetAnalysis:
         graph=dataset.graph,
         method_assignments=method_assignments,
         route_policy_summary="Auto routing uses SQL for reliable tables, keyword for exact names/acronyms, graph for relationships, hierarchical for long sections, semantic for factual prose, and hybrid when evidence spans modes.",
+        rag_classification_summary={
+            "counts": rag_counts,
+            "classifier_sources": dict(Counter(str(segment.metadata.get("classifier", "heuristic")) for segment in dataset.segments)),
+            "warnings": [
+                "SQL is only activated for CSV/XLSX inputs or high-confidence repeated table-like text.",
+            ],
+        },
         token_metrics={
             "estimated_dataset_tokens": estimated_dataset_tokens,
             "estimated_chunk_count": len(dataset.chunks),

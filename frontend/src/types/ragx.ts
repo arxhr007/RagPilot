@@ -54,6 +54,11 @@ export interface DatasetAnalysis {
   graph: { nodes?: Array<Record<string, unknown>>; edges?: Array<Record<string, unknown>> };
   method_assignments: Array<Record<string, unknown>>;
   route_policy_summary: string;
+  rag_classification_summary?: {
+    counts?: Record<string, number>;
+    classifier_sources?: Record<string, number>;
+    warnings?: string[];
+  };
   token_metrics?: {
     estimated_dataset_tokens?: number;
     estimated_chunk_count?: number;

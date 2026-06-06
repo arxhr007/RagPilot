@@ -31,14 +31,6 @@ export async function ingestUrl(url: string, maxPages: number): Promise<IngestRe
   );
 }
 
-export async function loadUniversalDemo(): Promise<IngestResponse> {
-  return parse<IngestResponse>(
-    await fetch(`${API_BASE}/api/demo/universal`, {
-      method: "POST",
-    }),
-  );
-}
-
 export async function chat(datasetId: string, question: string, routeOverride: RouteOverride): Promise<ChatResponse> {
   return parse<ChatResponse>(
     await fetch(`${API_BASE}/api/chat`, {

@@ -6,6 +6,7 @@ from uuid import uuid4
 import pandas as pd
 
 from app.config import SQLITE_DIR
+from app.analysis.rag_classifier import classify_segments_for_rag
 from app.analysis.segmenter import segment_text
 from app.ingestion.text import chunks_from_text, read_text_file
 from app.models.schemas import IngestedChunk, Segment
@@ -67,7 +68,7 @@ def extract_document_text(path: Path) -> tuple[str, str]:
 
 def ingest_document_file(dataset_id: str, input_id: str, path: Path) -> tuple[list[IngestedChunk], list[Segment]]:
     text, kind = extract_document_text(path)
-    segments = segment_text(text, path.name, input_id)
+    segments = classify_segments_for_rag(segment_text(text, path.name, input_id))
     indexable_segments = [segment for segment in segments if segment.rag_module != "sql"]
     chunks: list[IngestedChunk] = []
     for segment in indexable_segments:

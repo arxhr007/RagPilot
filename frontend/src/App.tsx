@@ -12,20 +12,11 @@ import {
   Route,
   Search,
   Send,
-  Sparkles,
 } from "lucide-react";
 import { AnimatedGrid } from "./components/AnimatedGrid";
-import { chat, ingestUrl, loadUniversalDemo, uploadFiles } from "./services/api";
+import { chat, ingestUrl, uploadFiles } from "./services/api";
 import type { Architecture, ChatResponse, DatasetAnalysis, IngestResponse, RouteOverride } from "./types/ragx";
 import "./styles.css";
-
-const DEMO_QUESTIONS = [
-  "Who is the CEO?",
-  "Which products are connected to BeaconAI?",
-  "How many products are active?",
-  "List the event speakers",
-  "Which team owns AtlasFlow?",
-];
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -65,6 +56,28 @@ function contextBudget(analysis: DatasetAnalysis | null, answer: ChatResponse | 
   return { datasetTokens, evidenceTokens, savedTokens, reduction };
 }
 
+function dataSuggestions(analysis: DatasetAnalysis | null) {
+  if (!analysis) return [];
+  const suggestions: string[] = [];
+  const tables = analysis.detected_tables ?? [];
+  const entities = analysis.graph?.nodes ?? [];
+  const modes = new Set(analysis.rag_modes_selected ?? []);
+  const tableNames = tables.map((table) => String(table.source_name || table.table_name || "").toLowerCase()).join(" ");
+  const columns = tables.flatMap((table) => Array.isArray(table.columns) ? table.columns.map(String) : []);
+  const columnText = columns.join(" ").toLowerCase();
+
+  if (columnText.includes("speaker") || tableNames.includes("event")) suggestions.push("List the event speakers");
+  if (columnText.includes("venue")) suggestions.push("Where is the event venue?");
+  if (columnText.includes("product")) suggestions.push("How many active products are listed?");
+  if (columnText.includes("owner") || columnText.includes("team")) suggestions.push("Which team owns a product in this data?");
+  if (modes.has("graph") && entities.length) suggestions.push(`Which systems are connected to ${String(entities[0].label ?? entities[0].id)}?`);
+  if (modes.has("keyword")) suggestions.push("What exact contacts, IDs, or codes are listed?");
+  if (modes.has("hierarchical")) suggestions.push("Summarize the longest policy or handbook section");
+  if (modes.has("semantic")) suggestions.push("Summarize the main narrative sections");
+
+  return Array.from(new Set(suggestions)).slice(0, 6);
+}
+
 function MetricCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
     <article className="metric-card">
@@ -72,6 +85,81 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
       <strong>{value}</strong>
       <small>{note}</small>
     </article>
+  );
+}
+
+function GraphRagViz({ graph }: { graph?: { nodes?: Array<Record<string, unknown>>; edges?: Array<Record<string, unknown>> } | null }) {
+  const nodes = (graph?.nodes ?? []).slice(0, 18);
+  const nodeIds = new Set(nodes.map((node) => String(node.id ?? node.label)));
+  const edges = (graph?.edges ?? [])
+    .filter((edge) => nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target)))
+    .slice(0, 32);
+
+  if (!nodes.length) {
+    return <p className="muted">Graph RAG visualization appears after entity relationships are extracted.</p>;
+  }
+
+  const center = { x: 220, y: 145 };
+  const radius = nodes.length > 10 ? 112 : 96;
+  const positioned = nodes.map((node, index) => {
+    const angle = (Math.PI * 2 * index) / nodes.length - Math.PI / 2;
+    const weight = Number(node.weight ?? 1);
+    return {
+      id: String(node.id ?? node.label),
+      label: String(node.label ?? node.id),
+      type: String(node.type ?? "Entity"),
+      weight,
+      x: center.x + Math.cos(angle) * radius,
+      y: center.y + Math.sin(angle) * radius,
+      r: Math.min(21, 8 + weight * 2),
+    };
+  });
+  const byId = new Map(positioned.map((node) => [node.id, node]));
+  const typeCounts = positioned.reduce<Record<string, number>>((acc, node) => {
+    acc[node.type] = (acc[node.type] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <div className="graph-viz">
+      <svg viewBox="0 0 440 290" role="img" aria-label="Graph RAG entity relationship visualization">
+        <defs>
+          <filter id="graphGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#063b91" floodOpacity="0.18" />
+          </filter>
+        </defs>
+        {edges.map((edge, index) => {
+          const source = byId.get(String(edge.source));
+          const target = byId.get(String(edge.target));
+          if (!source || !target) return null;
+          const weight = Math.min(4, Math.max(1, Number(edge.weight ?? 1)));
+          return (
+            <line
+              key={`${source.id}-${target.id}-${index}`}
+              x1={source.x}
+              y1={source.y}
+              x2={target.x}
+              y2={target.y}
+              stroke="#8abfff"
+              strokeWidth={weight}
+              strokeOpacity="0.52"
+            />
+          );
+        })}
+        {positioned.map((node) => (
+          <g key={node.id} filter="url(#graphGlow)">
+            <circle className={`graph-node graph-node-${node.type.toLowerCase()}`} cx={node.x} cy={node.y} r={node.r} />
+            <text x={node.x} y={node.y + node.r + 13} textAnchor="middle">{node.label.length > 18 ? `${node.label.slice(0, 16)}...` : node.label}</text>
+          </g>
+        ))}
+      </svg>
+      <div className="graph-legend">
+        {Object.entries(typeCounts).map(([type, count]) => (
+          <span key={type}>{type}: {count}</span>
+        ))}
+      </div>
+      <p className="muted">{nodes.length} entities and {edges.length} visible relationships. Edges show co-occurrence evidence used by Graph RAG.</p>
+    </div>
   );
 }
 
@@ -178,7 +266,7 @@ export default function App() {
   const [answer, setAnswer] = useState<ChatResponse | null>(null);
   const [url, setUrl] = useState("");
   const [maxPages, setMaxPages] = useState(4);
-  const [question, setQuestion] = useState("What are the most important facts in this dataset?");
+  const [question, setQuestion] = useState("");
   const [routeOverride, setRouteOverride] = useState<RouteOverride>("auto");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -186,6 +274,7 @@ export default function App() {
 
   const activeNodes = useMemo(() => architecture?.workflow_nodes ?? analysis?.activated_nodes ?? [], [architecture, analysis]);
   const budget = contextBudget(analysis, answer);
+  const suggestions = useMemo(() => dataSuggestions(analysis), [analysis]);
 
   useEffect(() => {
     const onPopState = () => setPage(window.location.pathname === "/chat" ? "/chat" : "/");
@@ -220,11 +309,6 @@ export default function App() {
 
   function askCurrent(override: RouteOverride = routeOverride) {
     run(() => chat(datasetId, question, override), setAnswer);
-  }
-
-  function askDemo(demoQuestion: string) {
-    setQuestion(demoQuestion);
-    if (datasetId) run(() => chat(datasetId, demoQuestion, "auto"), setAnswer);
   }
 
   if (page === "/chat") {
@@ -316,10 +400,6 @@ export default function App() {
               </button>
             </div>
             <div className="demo-row">
-              <button className="ghost-button" disabled={busy} onClick={() => run(loadUniversalDemo, acceptIngest)}>
-                <Sparkles size={15} />
-                Load Demo Dataset
-              </button>
               {datasetId && (
                 <button className="ghost-button" onClick={() => navigate("/chat")}>
                   <MessageSquare size={15} />
@@ -401,18 +481,34 @@ export default function App() {
 
           <Panel title="RAG Method Map" icon={<Activity size={18} />}>
             {analysis?.method_assignments?.length ? (
-              <div className="method-list">
-                {analysis.method_assignments.slice(0, 20).map((item, idx) => (
-                  <article key={`${String(item.title)}-${idx}`}>
-                    <div className="segment-head">
-                      <strong>{String(item.title)}</strong>
-                      <span>{String(item.method)} - {Math.round(Number(item.confidence ?? 0) * 100)}%</span>
-                    </div>
-                    <p>{String(item.segment_type)} - {String(item.reason || "Selected from detected structure and query signals.")}</p>
-                    {Boolean(item.table_name) && <small>SQLite table: {String(item.table_name)}</small>}
-                  </article>
-                ))}
-              </div>
+              <>
+                <div className="classification-summary">
+                  {Object.entries(analysis.rag_classification_summary?.counts ?? {}).map(([mode, count]) => (
+                    <span key={mode}>{mode}: <b>{count}</b></span>
+                  ))}
+                </div>
+                <div className="method-list">
+                  {analysis.method_assignments.slice(0, 20).map((item, idx) => {
+                    const secondary = Array.isArray(item.secondary_rags) ? item.secondary_rags : [];
+                    const signals = Array.isArray(item.signals) ? item.signals : [];
+                    return (
+                      <article key={`${String(item.title)}-${idx}`}>
+                        <div className="segment-head">
+                          <strong>{String(item.title)}</strong>
+                          <span>{String(item.primary_rag ?? item.method)} - {Math.round(Number(item.confidence ?? 0) * 100)}%</span>
+                        </div>
+                        <div className="classifier-line">
+                          <span>{String(item.classifier ?? "heuristic").replaceAll("_", " ")}</span>
+                          {secondary.map((mode) => <i key={String(mode)}>+ {String(mode)}</i>)}
+                        </div>
+                        <p>{String(item.segment_type)} - {String(item.decision_reason || item.reason || "Selected from detected structure and query signals.")}</p>
+                        {signals.length > 0 && <small>Signals: {signals.map(String).join(", ")}</small>}
+                        {Boolean(item.table_name) && <small>SQLite table: {String(item.table_name)}</small>}
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
             ) : <p className="muted">Upload data to see which RAG method is assigned to each section.</p>}
           </Panel>
 
@@ -423,16 +519,16 @@ export default function App() {
               ))}
             </select>
             <div className="ask-row">
-              <input value={question} onChange={(event) => setQuestion(event.target.value)} />
+              <input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={analysis ? "Ask a question from this dataset..." : "Upload data first, then ask..."} />
               <button disabled={!datasetId || !question || busy} onClick={() => askCurrent()}>
                 {busy ? <Loader2 className="spin" size={16} /> : <Send size={16} />}
                 Ask
               </button>
             </div>
             <div className="demo-questions">
-              {DEMO_QUESTIONS.map((demoQuestion) => (
-                <button className="ghost-button" key={demoQuestion} disabled={busy} onClick={() => askDemo(demoQuestion)}>
-                  {demoQuestion}
+              {suggestions.map((suggestion) => (
+                <button className="ghost-button" key={suggestion} disabled={busy} onClick={() => setQuestion(suggestion)}>
+                  {suggestion}
                 </button>
               ))}
             </div>
@@ -471,7 +567,7 @@ export default function App() {
             ) : <p className="muted">Citations appear after semantic or hybrid answers.</p>}
           </Panel>
 
-          <Panel title="SQL + Graph" icon={<Database size={18} />}>
+          <Panel title="SQL Evidence" icon={<Database size={18} />}>
             {answer?.generated_sql && <pre>{answer.generated_sql}</pre>}
             {answer?.sql_rows?.length ? (
               <div className="table-wrap">
@@ -497,11 +593,11 @@ export default function App() {
                 ))}
               </div>
             ) : null}
-            {(answer?.graph?.nodes?.length || analysis?.graph?.nodes?.length) ? (
-              <div className="graph-cloud">
-                {(answer?.graph?.nodes ?? analysis?.graph?.nodes ?? []).slice(0, 24).map((node) => <span key={String(node.id)}>{String(node.label)}</span>)}
-              </div>
-            ) : <p className="muted">Generated SQL and graph entities appear when those routes activate.</p>}
+            {!answer?.generated_sql && !analysis?.detected_tables?.length ? <p className="muted">Generated SQL and result rows appear when SQL RAG activates.</p> : null}
+          </Panel>
+
+          <Panel title="Graph RAG" icon={<GitBranch size={18} />}>
+            <GraphRagViz graph={answer?.graph ?? analysis?.graph} />
             {analysis?.graph?.edges?.length ? <p className="muted">{analysis.graph.edges.length} graph relationship edges detected.</p> : null}
           </Panel>
         </div>

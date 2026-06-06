@@ -6,6 +6,7 @@ from uuid import uuid4
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.config import UPLOAD_DIR
+from app.analysis.rag_classifier import classify_segments_for_rag
 from app.analysis.segmenter import segment_table_input
 from app.analysis.facts import extract_facts_from_segments
 from app.ingestion.files import detect_file_kind, ingest_document_file, ingest_table_file, make_input_record
@@ -117,7 +118,7 @@ async def ingest_website(payload: UrlIngestRequest):
     from app.ingestion.table_extract import load_text_tables
 
     combined = "\n\n".join(chunk.text for chunk in chunks)
-    segments = segment_text(combined, record["name"], record["id"])
+    segments = classify_segments_for_rag(segment_text(combined, record["name"], record["id"]))
     dataset.segments.extend(segments)
     dataset.tables.extend(load_text_tables(dataset.id, record["name"], segments))
     dataset = _refresh(dataset.id)

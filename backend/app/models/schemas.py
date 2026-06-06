@@ -71,6 +71,7 @@ class DatasetAnalysis(BaseModel):
     graph: dict[str, Any] = Field(default_factory=dict)
     method_assignments: list[dict[str, Any]] = Field(default_factory=list)
     route_policy_summary: str = ""
+    rag_classification_summary: dict[str, Any] = Field(default_factory=dict)
     token_metrics: dict[str, Any] = Field(default_factory=dict)
 
 

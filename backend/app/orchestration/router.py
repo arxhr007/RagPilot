@@ -111,6 +111,24 @@ def _estimate_context_budget(dataset: Dataset, sources, sql_rows) -> dict:
 
 def answer_question(dataset: Dataset, question: str, route_override: str = "auto") -> ChatResponse:
     understood = understand_query(question, dataset_vocabulary(dataset))
+    if understood.intent == "casual_chat":
+        return ChatResponse(
+            dataset_id=dataset.id,
+            question=question,
+            answer="Hi, I am ready. Ask me something from the uploaded data and I will answer with the best RAG route.",
+            route="semantic",
+            confidence=0.0,
+            route_reason="Casual chat was detected, so retrieval was skipped.",
+            normalized_query=understood.normalized,
+            expanded_query=understood.expanded,
+            query_intent=understood.intent,
+            direct_answer="Hi, I am ready. Ask me something from the uploaded data and I will answer with the best RAG route.",
+            answer_confidence=1.0,
+            answer_validation={"status": "casual_chat", "reasons": ["The message was conversational, not a dataset question."]},
+            candidate_count=0,
+            retrievers_skipped=[{"retriever": "all", "reason": "Casual chat does not need retrieval."}],
+            context_budget=_estimate_context_budget(dataset, [], []),
+        )
     route, confidence, reason = classify_query(dataset, understood.normalized, route_override)
     sources = []
     generated_sql = None

@@ -1,0 +1,188 @@
+# BIG UNIVERSAL RAGX TEST DATASET
+
+This is a fictional mixed-domain dataset for testing adaptive Multi-RAG behavior. It combines company knowledge, product records, event schedules, system dependency notes, support contacts, policy documents, exact identifiers, and noisy prose. The goal is to make RAGX classify regions into semantic RAG, SQL RAG, graph RAG, keyword/BM25 RAG, hierarchical/section RAG, and hybrid fusion.
+
+## COMPANY OVERVIEW
+
+Omniverse Labs is a fictional applied AI company that builds workflow software for research teams, event operators, support centers, and product organizations. The company mission is to help small expert teams coordinate complex decisions without copying every document into every conversation. Omniverse Labs believes that a small language model can answer high-value questions when the surrounding retrieval system selects the right evidence, compresses context, and validates answers against source material.
+
+The company was founded by Maya Iyer, Rafael Stone, and Priya Menon. Maya Iyer is the CEO of Omniverse Labs. Rafael Stone is the CTO. Priya Menon is the Chief Strategy Officer and also chairs the NovaCon programming council. The company headquarters is located at 410 Meridian Loop, Northstar City. The main office phone number is +1-555-0142. The public contact email is hello@omniverse.example.
+
+Omniverse Labs operates five core teams: Platform Team, Research Team, Documentation Team, Security Team, and Experience Team. The Platform Team owns AtlasFlow and the public API gateway. The Research Team owns BeaconAI. The Documentation Team owns DeltaDocs. The Security Team owns SentinelKey. The Experience Team owns NovaPass and the event attendee portal.
+
+## LEADERSHIP AND ROLE FACTS
+
+CEO: Maya Iyer
+CTO: Rafael Stone
+Chief Strategy Officer: Priya Menon
+VP Engineering: Jonah Reed
+Head of Security: Laila Chen
+Head of Documentation: Omar Vale
+Head of Events: Nia Kapoor
+Support Director: Elena Brooks
+Incident Commander: Marcus Hale
+Data Protection Officer: Sofia Marin
+
+CEO email: maya.iyer@omniverse.example
+Security escalation email: security-escalation@omniverse.example
+Support email: support@omniverse.example
+Developer relations email: devrel@omniverse.example
+Emergency hotline: +1-555-0199
+Vendor desk phone: +1-555-0177
+
+## PRODUCT TABLE
+
+| Product | Owner Team | Status | Monthly Users | Primary Contact | Launch Quarter |
+| AtlasFlow | Platform Team | Active | 42000 | Jonah Reed | 2025-Q2 |
+| BeaconAI | Research Team | Active | 12500 | Rafael Stone | 2025-Q4 |
+| DeltaDocs | Documentation Team | Active | 9800 | Omar Vale | 2024-Q3 |
+| SentinelKey | Security Team | Active | 7100 | Laila Chen | 2026-Q1 |
+| NovaPass | Experience Team | Pilot | 3400 | Nia Kapoor | 2026-Q2 |
+| LedgerLite | Finance Tools Team | Retired | 600 | Elena Brooks | 2023-Q1 |
+| EchoDesk | Support Team | Active | 18800 | Elena Brooks | 2024-Q1 |
+| MapForge | Infrastructure Team | Beta | 2200 | Marcus Hale | 2026-Q3 |
+
+## ENDPOINT TABLE
+
+| Endpoint | Method | Product | Owner | Stability | Auth Scope |
+| /v1/flows/run | POST | AtlasFlow | Platform Team | stable | flow:write |
+| /v1/flows/status | GET | AtlasFlow | Platform Team | stable | flow:read |
+| /v1/beacon/query | POST | BeaconAI | Research Team | beta | beacon:query |
+| /v1/beacon/feedback | POST | BeaconAI | Research Team | beta | beacon:write |
+| /v1/docs/search | GET | DeltaDocs | Documentation Team | stable | docs:read |
+| /v1/docs/export | POST | DeltaDocs | Documentation Team | stable | docs:write |
+| /v1/security/token | POST | SentinelKey | Security Team | stable | security:write |
+| /v1/events/checkin | POST | NovaPass | Experience Team | pilot | event:write |
+
+## EVENT SCHEDULE TABLE
+
+| Event | Speaker | Venue | Date | Track | Sponsor |
+| Opening Keynote | Priya Menon | Aurora Hall | 14 July 2026 | Leadership | Omniverse Labs |
+| Retrieval Systems Workshop | Rafael Stone | Lab 2A | 14 July 2026 | Engineering | VectorWorks |
+| Secure AI Briefing | Laila Chen | Meridian Room | 15 July 2026 | Security | Sentinel Partners |
+| Documentation Clinic | Omar Vale | Studio 4 | 15 July 2026 | Product | DeltaDocs Guild |
+| Community Showcase | Nia Kapoor | Expo Floor | 16 July 2026 | Community | NovaPass |
+| Closing Panel | Maya Iyer | Aurora Hall | 16 July 2026 | Strategy | Omniverse Labs |
+
+## INCIDENT AND TICKET TABLE
+
+| Ticket ID | Severity | System | Owner | Status | SLA Hours |
+| INC-2026-041 | P1 | SentinelKey | Security Team | Open | 2 |
+| INC-2026-052 | P2 | BeaconAI | Research Team | Investigating | 8 |
+| INC-2026-078 | P3 | DeltaDocs | Documentation Team | Monitoring | 24 |
+| REQ-2026-110 | P4 | AtlasFlow | Platform Team | Planned | 72 |
+| BUG-2026-201 | P2 | NovaPass | Experience Team | Open | 8 |
+| AUD-2026-330 | P1 | API Gateway | Security Team | Open | 2 |
+
+## REVENUE TABLE
+
+| Quarter | Product | Region | RevenueUSD | Customers |
+| 2026-Q1 | AtlasFlow | North America | 920000 | 144 |
+| 2026-Q1 | BeaconAI | North America | 380000 | 48 |
+| 2026-Q1 | DeltaDocs | Europe | 260000 | 72 |
+| 2026-Q1 | SentinelKey | Europe | 310000 | 39 |
+| 2026-Q2 | AtlasFlow | North America | 980000 | 151 |
+| 2026-Q2 | BeaconAI | Asia Pacific | 420000 | 57 |
+| 2026-Q2 | DeltaDocs | Europe | 300000 | 78 |
+| 2026-Q2 | NovaPass | North America | 90000 | 18 |
+
+## GRAPH RELATIONSHIPS AND DEPENDENCIES
+
+AtlasFlow depends on BeaconAI for intent classification and on DeltaDocs for policy retrieval. BeaconAI depends on SentinelKey for token validation and on MapForge for regional routing experiments. DeltaDocs is connected to AtlasFlow because workflow runs attach documentation bundles to every completed process. DeltaDocs is also connected to EchoDesk because support agents search documentation before opening a ticket.
+
+SentinelKey protects BeaconAI, AtlasFlow, DeltaDocs, and NovaPass through scoped access tokens. NovaPass connects to BeaconAI for attendee recommendation prompts and to AtlasFlow for event task automation. EchoDesk connects to DeltaDocs for knowledge-base answers and connects to SentinelKey for agent authentication. MapForge provides location-aware routing for NovaPass and AtlasFlow.
+
+Maya Iyer works with Priya Menon on strategy. Priya Menon works with Nia Kapoor on NovaCon. Rafael Stone works with Jonah Reed on AtlasFlow and BeaconAI integration. Laila Chen works with Marcus Hale on incident response. Omar Vale works with Elena Brooks because support tickets frequently become documentation updates.
+
+VectorWorks is a vendor connected to BeaconAI embeddings. Sentinel Partners is a vendor connected to SentinelKey audits. DeltaDocs Guild is a community partner connected to documentation clinics. NovaPass is connected to the Experience Team, Aurora Hall, Expo Floor, and the attendee check-in system.
+
+## EXACT IDENTIFIERS AND KEYWORD LOOKUPS
+
+Company code: OML-CORE-77
+Primary workspace ID: WS-OMNI-4401
+Security policy code: SEC-POL-19A
+Privacy policy code: PRIV-77B
+Onboarding policy code: HR-ONB-42
+NovaCon event ID: EVT-NOVA-2026
+BeaconAI model registry ID: MDL-BEACON-9X
+AtlasFlow SKU: SKU-AF-4200
+DeltaDocs SKU: SKU-DD-9800
+SentinelKey SKU: SKU-SK-7100
+NovaPass SKU: SKU-NP-3400
+Main conference room: Aurora Hall
+Security room: Meridian Room
+Engineering lab: Lab 2A
+Documentation studio: Studio 4
+Public status page: status.omniverse.example
+Runbook folder: RUNBOOK-OMEGA
+
+If someone asks for SEC-POL-19A, the answer should point to the security incident policy. If someone asks for HR-ONB-42, the answer should point to the onboarding policy for new engineers. If someone asks for MDL-BEACON-9X, the answer should identify it as the BeaconAI model registry ID. These exact codes are designed for keyword retrieval.
+
+## ENGINEERING HANDBOOK: NEW ENGINEER ONBOARDING
+
+### Purpose
+
+The new engineer onboarding policy explains how engineers join Omniverse Labs projects without overloading senior staff or exposing sensitive systems too early. The policy exists because AtlasFlow, BeaconAI, SentinelKey, DeltaDocs, and NovaPass all share dependencies. A new engineer must understand the product map, the security model, the documentation process, and the incident response path before shipping production changes.
+
+### Week One
+
+During week one, every engineer receives a workspace account, a SentinelKey training token, access to DeltaDocs, and a read-only AtlasFlow sandbox. The engineer must complete the security primer, read the API gateway overview, review the team ownership table, and attend one live onboarding session with the Platform Team. The engineer should not receive production write access during week one unless the Incident Commander approves an emergency exception.
+
+### Week Two
+
+During week two, the engineer shadows a product owner. Platform engineers shadow Jonah Reed on AtlasFlow workflow reliability. Research engineers shadow Rafael Stone on BeaconAI evaluation and retrieval tests. Documentation engineers shadow Omar Vale on DeltaDocs publishing review. Security engineers shadow Laila Chen on SentinelKey audit trails. Experience engineers shadow Nia Kapoor on NovaPass attendee operations.
+
+### Week Three
+
+During week three, the engineer completes a small scoped change. The change must include a ticket ID, a test note, and a rollback note. If the change touches BeaconAI, it must include evaluation evidence. If the change touches SentinelKey, it must include a security review. If the change touches DeltaDocs, it must include documentation owner approval. If the change touches NovaPass, it must include event operations approval.
+
+### Graduation Criteria
+
+An engineer completes onboarding after finishing the security primer, shipping one scoped change, presenting a five-minute learning summary, and receiving approval from the team owner. The onboarding record is stored under HR-ONB-42. The policy owner is Jonah Reed. The escalation contact for onboarding exceptions is people-ops@omniverse.example.
+
+This handbook section is intentionally long so hierarchical RAG can preserve the parent section when answering broad questions. A query such as "Summarize the onboarding policy for new engineers" should use section context rather than a random nearby chunk. A query such as "What is HR-ONB-42?" should use keyword retrieval. A query such as "Who owns onboarding exceptions?" should combine keyword and semantic evidence.
+
+## SECURITY INCIDENT POLICY
+
+The security incident policy defines how Omniverse Labs handles suspected compromise, unauthorized access, leaked credentials, suspicious API usage, or abnormal model behavior. The policy code is SEC-POL-19A. The policy owner is Laila Chen. The Incident Commander is Marcus Hale. The escalation email for security incidents is security-escalation@omniverse.example. The emergency hotline is +1-555-0199.
+
+All P1 incidents require immediate triage within two hours. SentinelKey incidents require token rotation, audit log export, and customer-impact analysis. BeaconAI incidents require prompt trace review, retrieval log review, and model registry validation. AtlasFlow incidents require workflow replay analysis and rollback planning. DeltaDocs incidents require publication freeze if documentation integrity is suspected.
+
+The incident response sequence is detect, contain, investigate, communicate, remediate, and review. The review must identify whether SentinelKey, API Gateway, BeaconAI, AtlasFlow, DeltaDocs, NovaPass, or EchoDesk was involved. The final incident note must reference a ticket ID such as INC-2026-041 or AUD-2026-330.
+
+## PRODUCT NARRATIVES
+
+AtlasFlow is the workflow automation product for teams that need repeatable decision paths. It is strongest when a user needs routing, approvals, task automation, and audit-friendly process history. AtlasFlow often relies on BeaconAI to classify intent and on DeltaDocs to attach reference material to a workflow. This makes AtlasFlow a good example of hybrid retrieval because table ownership, graph dependencies, and narrative product descriptions can all matter.
+
+BeaconAI is a retrieval and evaluation assistant used by research teams. It helps classify prompts, evaluate answer quality, and route questions to specialized retrievers. BeaconAI depends on SentinelKey for secure access and on VectorWorks for embedding experiments. BeaconAI is connected to AtlasFlow, NovaPass, and the API Gateway. A question about BeaconAI dependencies should activate graph retrieval, while a question about its endpoint should activate SQL over the endpoint table.
+
+DeltaDocs is a documentation intelligence product for support and engineering teams. It stores source-controlled guides, release notes, runbooks, and policy snippets. DeltaDocs connects to EchoDesk for support answers and to AtlasFlow for workflow documentation. A question about what DeltaDocs does should be semantic. A question about its endpoint should be SQL. A question about connected systems should be graph or hybrid.
+
+SentinelKey is the security token and access policy product. It issues scoped tokens, validates service access, and supports audit trails. SentinelKey protects BeaconAI, AtlasFlow, DeltaDocs, and NovaPass. A question about security incidents should use semantic and keyword retrieval because the policy code, email, and role names are exact.
+
+NovaPass is the event operations and attendee check-in product. It coordinates event sessions, badge scans, recommendations, and venue workflows. NovaPass is connected to BeaconAI for recommendations and AtlasFlow for task automation. Questions about NovaCon speakers and venues should use SQL over the event schedule table.
+
+## SUPPORT PLAYBOOK
+
+Support agents begin by searching DeltaDocs. If DeltaDocs does not answer the question, EchoDesk opens a ticket. If the ticket references credentials, SentinelKey must be included. If the ticket references workflow failures, AtlasFlow must be included. If the ticket references recommendation quality, BeaconAI must be included. If the ticket references event check-in, NovaPass must be included.
+
+For customer-impacting outages, support must notify Elena Brooks and Marcus Hale. For documentation corrections, support must notify Omar Vale. For event problems during NovaCon, support must notify Nia Kapoor. For security incidents, support must send the case to security-escalation@omniverse.example and include the ticket ID.
+
+## AMBIGUOUS AND NOISY NOTES
+
+The phrase "blue room" sometimes means Aurora Hall during event planning, but the official room name remains Aurora Hall. The phrase "beacon team" usually means Research Team, but in old meeting notes it may refer to a vendor group. The phrase "docs team" means Documentation Team. The phrase "sentinel review" means a SentinelKey security audit. The phrase "flow run" means an AtlasFlow workflow execution.
+
+Random note: snack inventory was moved from Studio 4 to the Expo Floor during NovaCon setup. This is not a product dependency. Random note: someone wrote "Atlas Beacon Delta" on a whiteboard during a brainstorming session; this alone should not be treated as a real dependency. Random note: the old LedgerLite system is retired and should not be counted as an active product.
+
+## EXPECTED DEMO QUESTIONS
+
+Who is the CEO of Omniverse Labs?
+Which products depend on BeaconAI?
+How many active products are listed?
+List all speakers at NovaCon.
+Which team owns AtlasFlow?
+What is the escalation email for security incidents?
+Which systems are connected to DeltaDocs?
+Summarize the onboarding policy for new engineers.
+Which endpoint belongs to BeaconAI?
+Compare AtlasFlow and DeltaDocs using table and narrative evidence.

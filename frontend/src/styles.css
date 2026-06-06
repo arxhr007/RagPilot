@@ -410,8 +410,30 @@ button:disabled { opacity: .48; cursor: not-allowed; }
   font-size: 13px;
 }
 .segments small, .method-list small {
+  display: block;
+  margin-top: 5px;
   color: var(--muted);
   line-height: 1.4;
+}
+.classification-summary, .classifier-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 8px 0;
+}
+.classification-summary span, .classifier-line span, .classifier-line i {
+  border: 1px solid rgba(15, 86, 199, .3);
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  color: var(--blue-dark);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-style: normal;
+}
+.classifier-line span {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  font-weight: 700;
 }
 pre {
   padding: 12px;
@@ -419,6 +441,57 @@ pre {
   color: #d9eaff;
   border-radius: 6px;
   overflow: auto;
+}
+.graph-viz {
+  margin-top: 12px;
+  border: 1px solid rgba(15, 86, 199, .24);
+  border-radius: 6px;
+  background:
+    linear-gradient(to right, rgba(207, 228, 255, .58) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(207, 228, 255, .58) 1px, transparent 1px),
+    rgba(255,255,255,.76);
+  background-size: 28px 28px;
+  padding: 10px;
+}
+.graph-viz svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 220px;
+}
+.graph-node {
+  fill: var(--blue);
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+.graph-node-person { fill: #0f56c7; }
+.graph-node-department { fill: #2196d3; }
+.graph-node-program { fill: #65b8ff; }
+.graph-node-committee { fill: #063b91; }
+.graph-node-document { fill: #7aa8ff; }
+.graph-viz text {
+  fill: var(--ink);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(255,255,255,.92);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 8px;
+}
+.graph-legend span {
+  border: 1px solid rgba(15, 86, 199, .34);
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  color: var(--blue-dark);
+  padding: 5px 8px;
+  font-size: 12px;
 }
 .table-wrap { overflow: auto; max-height: 250px; }
 table { border-collapse: collapse; width: 100%; font-size: 12px; }

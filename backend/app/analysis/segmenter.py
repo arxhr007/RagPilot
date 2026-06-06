@@ -151,5 +151,14 @@ def segment_table_input(source_name: str, input_id: str, table_name: str, column
         reasons=["CSV/XLSX input was directly loaded as a structured SQLite table."],
         text_preview=f"{row_count} rows with columns: {', '.join(columns[:10])}",
         table_name=table_name,
-        metadata={"input_id": input_id, "columns": columns, "row_count": row_count},
+        metadata={
+            "input_id": input_id,
+            "columns": columns,
+            "row_count": row_count,
+            "classifier": "heuristic",
+            "primary_rag": "sql",
+            "secondary_rags": [],
+            "signals": ["structured file", "tabular columns", "row count"],
+            "decision_reason": "CSV/XLSX input was directly loaded as a reliable SQLite table.",
+        },
     )
