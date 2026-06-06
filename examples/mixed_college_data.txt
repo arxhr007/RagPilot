@@ -1,0 +1,34 @@
+SAHRDAYA COLLEGE OVERVIEW
+Sahrdaya College of Engineering and Technology is an autonomous engineering college with departments, programs, committees, and student support services.
+
+ADMINISTRATION
+Principal: Dr. Paul Thomas
+Chairman: Fr. George Mathew
+
+DEPARTMENT LIST
+| Department | Head | Program |
+| Computer Science and Engineering | Aaron Thomas | B.Tech CSE |
+| Electronics and Communication Engineering | Meera Joseph | B.Tech ECE |
+| Biomedical Engineering | Riya Mathew | B.Tech BME |
+
+FACULTY PROFILES
+Name: Aaron Thomas
+Role: Assistant Professor
+Department: Computer Science and Engineering
+Email: aaron.thomas@example.edu
+
+Name: Dr. Neena George
+Role: Head of Department
+Department: Computer Science and Engineering
+Email: neena.george@example.edu
+
+Name: Meera Joseph
+Role: Head of Department
+Department: Electronics and Communication Engineering
+Email: meera.joseph@example.edu
+
+HOD Message About Computer Science
+This heading should not be treated as a person or role holder.
+
+RELATIONSHIP NOTES
+Aaron Thomas is associated with Computer Science and Engineering. The Computer Science and Engineering department offers B.Tech CSE and supports the Innovation and Entrepreneurship Development Cell. The Academic Council reviews programs from Computer Science and Engineering and Electronics and Communication Engineering.

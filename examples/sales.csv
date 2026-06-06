@@ -1,0 +1,9 @@
+region,product,quarter,revenue,units
+North,Atlas,Q1,12000,38
+North,Atlas,Q2,15600,44
+South,Beacon,Q1,9800,31
+South,Beacon,Q2,13100,36
+West,Cobalt,Q1,18400,52
+West,Cobalt,Q2,22100,61
+East,Delta,Q1,11100,34
+East,Delta,Q2,14200,42

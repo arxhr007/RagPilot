@@ -1,0 +1,16 @@
+GLOBAL AI SUMMIT
+The Global AI Summit is a technology event for researchers, founders, and builders.
+
+EVENT DETAILS
+Venue: Meridian Convention Center
+Date: 12 March 2026
+Organizer: Future Labs
+
+SPEAKERS
+Name: Priya Nair
+Role: Keynote Speaker
+Topic: Responsible AI
+
+Name: Omar Khan
+Role: Speaker
+Topic: Agentic Workflows

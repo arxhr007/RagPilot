@@ -1,0 +1,72 @@
+OMNIVERSE INNOVATION FESTIVAL AND COMPANY KNOWLEDGE BASE
+
+Omniverse Labs is a fictional company that runs an annual event called NovaCon. This single dataset is intentionally mixed so RAGX can activate semantic RAG, SQL RAG, graph RAG, keyword/BM25 lookup, hierarchical section retrieval, and hybrid fusion.
+
+LEADERSHIP FACTS
+CEO: Maya Iyer
+CTO: Rafael Stone
+Principal Investigator: Dr. Elena Park
+Event Director: Nikhil Rao
+
+CONTACT FACTS
+Email: hello@omniverse.example
+Phone: +1 555 402 7788
+Office: 18 Riverfront Road, Seattle
+
+PRODUCT TABLE
+| Product | Owner Team | Status | Monthly Users |
+| AtlasFlow | Platform Team | Active | 42000 |
+| BeaconAI | Research Team | Beta | 12500 |
+| CivicPulse | Civic Data Team | Active | 9800 |
+| DeltaDocs | Documentation Team | Active | 6700 |
+
+EVENT SCHEDULE
+| Event | Speaker | Venue | Date | Track |
+| Opening Keynote | Priya Menon | Aurora Hall | 14 July 2026 | Leadership |
+| Graph Retrieval Workshop | Omar Khan | Lab 2 | 14 July 2026 | Engineering |
+| Responsible AI Panel | Lina Costa | Meridian Room | 15 July 2026 | Policy |
+| Startup Demo Night | Theo Grant | Expo Stage | 15 July 2026 | Business |
+
+TEAM RELATIONSHIPS
+AtlasFlow is owned by the Platform Team. BeaconAI depends on AtlasFlow for workflow orchestration. CivicPulse is maintained by the Civic Data Team and uses BeaconAI for document classification. DeltaDocs is connected to AtlasFlow because it generates API documentation from workflow metadata.
+
+TECHNICAL NOTES
+The invoice endpoint creates invoice records for enterprise customers. The workflow endpoint starts an AtlasFlow automation. The graph endpoint returns entity relationships for applications that need dependency analysis.
+
+API ENDPOINT TABLE
+| Endpoint | Method | Product | Owner |
+| /v1/invoices | POST | AtlasFlow | Billing Team |
+| /v1/workflows | POST | AtlasFlow | Platform Team |
+| /v1/entities/graph | GET | BeaconAI | Research Team |
+| /v1/docs/export | POST | DeltaDocs | Documentation Team |
+
+LONG POLICY SECTION
+Omniverse Labs has a responsible deployment policy for all AI products. The policy requires teams to document intended users, possible failure modes, data retention limits, evaluation results, and escalation contacts before a product can move from beta to active status. Each release review includes representatives from product, engineering, policy, security, and customer support. The review board checks that the product has monitoring, incident response procedures, human escalation paths, and clear user-facing documentation.
+
+The policy also says that customer-facing AI tools must provide source attribution when they summarize documents. Internal tools must log retrieval decisions so maintainers can inspect which data sources were used. Sensitive data should not be copied into prompts unless the user has permission to access the original source. If a model output has low confidence, the application should say that the evidence is insufficient instead of inventing an answer.
+
+PEOPLE DIRECTORY
+Name: Maya Iyer
+Role: CEO
+Team: Executive
+Email: maya.iyer@omniverse.example
+
+Name: Rafael Stone
+Role: CTO
+Team: Executive
+Email: rafael.stone@omniverse.example
+
+Name: Priya Menon
+Role: Keynote Speaker
+Team: NovaCon
+Email: priya.menon@omniverse.example
+
+Name: Omar Khan
+Role: Workshop Lead
+Team: Engineering Education
+Email: omar.khan@omniverse.example
+
+Name: Lina Costa
+Role: Policy Panelist
+Team: Responsible AI
+Email: lina.costa@omniverse.example

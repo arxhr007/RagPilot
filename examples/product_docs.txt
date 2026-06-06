@@ -1,0 +1,15 @@
+NOVA API PRODUCT NOTES
+Nova API helps developers create invoices and payment links.
+
+FEATURES
+The invoice endpoint creates an invoice object. The payment link endpoint creates hosted checkout links.
+
+VERSION NOTES
+Version: 2.1
+Release Date: 3 April 2026
+Breaking Change: The customer_id field is now required for invoice creation.
+
+ENDPOINTS
+| Endpoint | Method | Owner |
+| /v1/invoices | POST | Billing Team |
+| /v1/payment-links | POST | Checkout Team |
