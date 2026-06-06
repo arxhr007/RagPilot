@@ -263,8 +263,58 @@ def test_web_ingestion_recursively_crawls_same_domain(monkeypatch):
     urls = {chunk.source.url for chunk in chunks}
     assert record["recursive"] is True
     assert record["pages"] == 3
+    assert record["requested_pages"] == 3
+    assert record["crawl_status"] == "complete"
+    assert len(record["scraped_pages"]) == 3
+    assert record["scraped_pages"][1]["url"] == "https://example.test/about"
     assert "https://example.test/about" in urls
     assert "https://example.test/team" in urls
+
+
+def test_web_ingestion_uses_common_paths_when_home_has_no_links(monkeypatch):
+    import app.ingestion.web as web
+
+    pages = {
+        "https://example.test/": "<html><head><title>Home</title></head><body>Home page text</body></html>",
+        "https://example.test/about": "<html><head><title>About</title></head><body>About page text</body></html>",
+        "https://example.test/contact": "<html><head><title>Contact</title></head><body>Contact page text</body></html>",
+    }
+
+    monkeypatch.setattr(web, "_sitemap_urls", lambda *args, **kwargs: [])
+
+    def fake_fetch(url, session):
+        if url not in pages:
+            raise RuntimeError("missing page")
+        return pages[url]
+
+    monkeypatch.setattr(web, "_fetch_requests", fake_fetch)
+    record, chunks = web.ingest_url(dataset_id="web3", url="https://example.test", max_pages=3)
+    urls = {chunk.source.url for chunk in chunks}
+    assert record["pages"] == 3
+    assert "https://example.test/about" in urls
+    assert "https://example.test/contact" in urls
+
+
+def test_web_ingestion_expands_sitemap_indexes(monkeypatch):
+    import app.ingestion.web as web
+
+    class Response:
+        def __init__(self, text, ok=True):
+            self.text = text
+            self.ok = ok
+
+    class Session:
+        def get(self, url, timeout):
+            responses = {
+                "https://example.test/sitemap.xml": Response("<sitemapindex><sitemap><loc>https://example.test/posts.xml</loc></sitemap></sitemapindex>"),
+                "https://example.test/sitemap_index.xml": Response("", False),
+                "https://example.test/robots.txt": Response("", False),
+                "https://example.test/posts.xml": Response("<urlset><url><loc>https://example.test/a</loc></url><url><loc>https://example.test/b</loc></url></urlset>"),
+            }
+            return responses[url]
+
+    urls = web._sitemap_urls("https://example.test", "example.test", Session(), 4)
+    assert urls == ["https://example.test/a", "https://example.test/b"]
 
 
 def test_web_ingestion_uses_playwright_when_requested(monkeypatch):

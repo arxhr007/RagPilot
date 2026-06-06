@@ -393,13 +393,17 @@ button:disabled { opacity: .48; cursor: not-allowed; }
 .sources p { margin: 8px 0; color: var(--ink); font-size: 13px; }
 .sources small { display: block; color: var(--muted); margin-bottom: 7px; }
 .sources a { color: var(--blue); font-size: 12px; overflow-wrap: anywhere; }
-.segments, .table-list, .method-list {
+.segments, .table-list, .method-list, .scraped-pages {
   display: grid;
   gap: 10px;
   max-height: 430px;
   overflow: auto;
 }
-.segments article, .table-list article, .method-list article {
+.scraped-pages {
+  margin-top: 12px;
+  max-height: 260px;
+}
+.segments article, .table-list article, .method-list article, .scraped-pages article {
   border: 1px solid rgba(15, 86, 199, .24);
   border-radius: 6px;
   padding: 10px;
@@ -421,7 +425,14 @@ button:disabled { opacity: .48; cursor: not-allowed; }
   color: var(--ink);
   font-size: 13px;
 }
-.segments small, .method-list small {
+.scraped-pages a {
+  display: block;
+  margin: 5px 0;
+  color: var(--blue);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.segments small, .method-list small, .scraped-pages small {
   display: block;
   margin-top: 5px;
   color: var(--muted);

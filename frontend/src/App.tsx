@@ -78,6 +78,16 @@ function dataSuggestions(analysis: DatasetAnalysis | null) {
   return Array.from(new Set(suggestions)).slice(0, 6);
 }
 
+function scrapedPages(analysis: DatasetAnalysis | null) {
+  return (analysis?.detected_inputs ?? [])
+    .filter((input) => input.kind === "website")
+    .flatMap((input) => Array.isArray(input.scraped_pages) ? input.scraped_pages : []);
+}
+
+function websiteInputs(analysis: DatasetAnalysis | null) {
+  return (analysis?.detected_inputs ?? []).filter((input) => input.kind === "website");
+}
+
 function MetricCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
     <article className="metric-card">
@@ -276,6 +286,8 @@ export default function App() {
   const activeNodes = useMemo(() => architecture?.workflow_nodes ?? analysis?.activated_nodes ?? [], [architecture, analysis]);
   const budget = contextBudget(analysis, answer);
   const suggestions = useMemo(() => dataSuggestions(analysis), [analysis]);
+  const websitePages = useMemo(() => scrapedPages(analysis), [analysis]);
+  const websites = useMemo(() => websiteInputs(analysis), [analysis]);
 
   useEffect(() => {
     const onPopState = () => setPage(window.location.pathname === "/chat" ? "/chat" : "/");
@@ -404,6 +416,29 @@ export default function App() {
               <input type="checkbox" checked={usePlaywright} onChange={(event) => setUsePlaywright(event.target.checked)} />
               <span>Use Playwright for JS-heavy pages</span>
             </label>
+            {websitePages.length > 0 && (
+              <div className="scraped-pages">
+                <div className="segment-head">
+                  <strong>Scraped Pages</strong>
+                  <span>{websitePages.length} / {String(websites[0]?.requested_pages ?? websitePages.length)}</span>
+                </div>
+                {Boolean(websites[0]?.crawl_message) && <p className="muted">{String(websites[0]?.crawl_message)}</p>}
+                {websitePages.slice(0, 10).map((page, index) => (
+                  <article key={`${String((page as Record<string, unknown>).url)}-${index}`}>
+                    <strong>{String((page as Record<string, unknown>).title || "Untitled page")}</strong>
+                    <a href={String((page as Record<string, unknown>).url)} target="_blank" rel="noreferrer">
+                      {String((page as Record<string, unknown>).url)}
+                    </a>
+                    <small>
+                      {formatNumber(Number((page as Record<string, unknown>).text_chars ?? 0))} chars
+                      {Number((page as Record<string, unknown>).document_link_count ?? 0) > 0
+                        ? ` - ${String((page as Record<string, unknown>).document_link_count)} document links`
+                        : ""}
+                    </small>
+                  </article>
+                ))}
+              </div>
+            )}
             <div className="demo-row">
               {datasetId && (
                 <button className="ghost-button" onClick={() => navigate("/chat")}>
