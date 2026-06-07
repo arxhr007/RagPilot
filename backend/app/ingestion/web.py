@@ -36,8 +36,13 @@ def _normalize_url(url: str) -> str:
     return parsed._replace(path=path).geturl()
 
 
+def _canonical_host(host: str) -> str:
+    host = host.lower()
+    return host[4:] if host.startswith("www.") else host
+
+
 def _same_domain(url: str, domain: str) -> bool:
-    return urlparse(url).netloc.lower() == domain.lower()
+    return _canonical_host(urlparse(url).netloc) == _canonical_host(domain)
 
 
 def _is_crawlable(url: str, domain: str) -> bool:
@@ -78,6 +83,8 @@ def _page_from_html(url: str, html: str, domain: str) -> dict[str, Any]:
     for tag in soup.find_all(attrs={"data-href": True}):
         raw_links.append(str(tag["data-href"]).strip())
     for match in re.findall(r"""(?:href|url|to)\s*[:=]\s*["']([^"']+)["']""", html):
+        raw_links.append(match.strip())
+    for match in re.findall(r"""["'](/(?:about|contact|team|people|faculty|department|departments|programs|programmes|admission|admissions|events|news|blog|products|services|docs|documentation|support|faq|research|library|iqac|placement)[^"'\s<]*)["']""", html, flags=re.I):
         raw_links.append(match.strip())
 
     for href in raw_links:
@@ -132,7 +139,12 @@ def _fetch_playwright(url: str) -> str:
 
 
 def _fetch_page(url: str, domain: str, session: requests.Session, use_playwright: bool) -> dict[str, Any] | None:
-    html = _fetch_playwright(url) if use_playwright else _fetch_requests(url, session)
+    try:
+        html = _fetch_playwright(url) if use_playwright else _fetch_requests(url, session)
+    except Exception:
+        if not use_playwright:
+            raise
+        html = _fetch_requests(url, session)
     if not html:
         return None
     page = _page_from_html(url, html, domain)
@@ -191,7 +203,16 @@ def _sitemap_urls(base_url: str, domain: str, session: requests.Session, max_pag
 def _common_candidates(base_url: str, domain: str) -> list[str]:
     parsed = urlparse(base_url)
     origin = f"{parsed.scheme}://{domain}"
-    return [_normalize_url(urljoin(origin, path)) for path in COMMON_DISCOVERY_PATHS]
+    hosts = [domain]
+    if domain.startswith("www."):
+        hosts.append(domain[4:])
+    else:
+        hosts.append(f"www.{domain}")
+    candidates: list[str] = []
+    for host in hosts:
+        host_origin = f"{parsed.scheme}://{host}"
+        candidates.extend(_normalize_url(urljoin(host_origin, path)) for path in COMMON_DISCOVERY_PATHS)
+    return sorted(set(candidates))
 
 
 def _crawl(url: str, max_pages: int, use_playwright: bool, max_depth: int = 3) -> list[dict[str, Any]]:
@@ -237,7 +258,7 @@ def ingest_url(
     dataset_id: str,
     url: str,
     max_pages: int = 8,
-    use_playwright: bool = False,
+    use_playwright: bool = True,
 ) -> tuple[dict[str, Any], list[IngestedChunk]]:
     parsed = urlparse(url)
     domain = parsed.netloc

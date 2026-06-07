@@ -261,7 +261,7 @@ def test_web_ingestion_recursively_crawls_same_domain(monkeypatch):
 
     monkeypatch.setattr(web, "_sitemap_urls", lambda *args, **kwargs: [])
     monkeypatch.setattr(web, "_fetch_requests", lambda url, session: pages[url])
-    record, chunks = web.ingest_url(dataset_id="web1", url="https://example.test", max_pages=3)
+    record, chunks = web.ingest_url(dataset_id="web1", url="https://example.test", max_pages=3, use_playwright=False)
     urls = {chunk.source.url for chunk in chunks}
     assert record["recursive"] is True
     assert record["pages"] == 3
@@ -290,11 +290,35 @@ def test_web_ingestion_uses_common_paths_when_home_has_no_links(monkeypatch):
         return pages[url]
 
     monkeypatch.setattr(web, "_fetch_requests", fake_fetch)
-    record, chunks = web.ingest_url(dataset_id="web3", url="https://example.test", max_pages=3)
+    record, chunks = web.ingest_url(dataset_id="web3", url="https://example.test", max_pages=3, use_playwright=False)
     urls = {chunk.source.url for chunk in chunks}
     assert record["pages"] == 3
     assert "https://example.test/about" in urls
     assert "https://example.test/contact" in urls
+
+
+def test_web_ingestion_crawls_www_and_non_www_as_same_site(monkeypatch):
+    import app.ingestion.web as web
+
+    pages = {
+        "https://example.test/": '<html><head><title>Home</title></head><body>Home <a href="https://www.example.test/about">About</a></body></html>',
+        "https://www.example.test/about": '<html><head><title>About</title></head><body>About <a href="https://example.test/team">Team</a></body></html>',
+        "https://example.test/team": "<html><head><title>Team</title></head><body>Team page text</body></html>",
+    }
+
+    monkeypatch.setattr(web, "_sitemap_urls", lambda *args, **kwargs: [])
+
+    def fake_fetch(url, session):
+        if url not in pages:
+            raise RuntimeError("missing page")
+        return pages[url]
+
+    monkeypatch.setattr(web, "_fetch_requests", fake_fetch)
+    record, chunks = web.ingest_url(dataset_id="web4", url="https://example.test", max_pages=3, use_playwright=False)
+    urls = {chunk.source.url for chunk in chunks}
+    assert record["pages"] == 3
+    assert "https://www.example.test/about" in urls
+    assert "https://example.test/team" in urls
 
 
 def test_web_ingestion_expands_sitemap_indexes(monkeypatch):

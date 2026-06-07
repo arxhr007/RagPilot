@@ -117,15 +117,21 @@ Codex and OpenAI were used throughout the build:
 
 ## Demo
 
-[![Watch the RAGPilot demo on YouTube](https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/NXhBrgB6OyE)
+[![Watch the RAGPilot file upload demo on YouTube](https://img.shields.io/badge/File%20Upload%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/NXhBrgB6OyE)
 
-Demo / pitch video: [Click here to watch the RAGPilot demo on YouTube](https://youtu.be/NXhBrgB6OyE)
+[![Watch the RAGPilot web scraping demo on YouTube](https://img.shields.io/badge/Web%20Scraping%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/qPvQ0DipTRg)
+
+File upload demo: [Watch on YouTube](https://youtu.be/NXhBrgB6OyE)  
+This video shows RAGPilot ingesting a local file dataset, classifying its content into different RAG methods, and answering questions from the uploaded data.
+
+Web scraping demo: [Watch on YouTube](https://youtu.be/qPvQ0DipTRg)  
+This video shows RAGPilot recursively scraping a website, building a RAG pipeline from the scraped pages, and answering questions from that website content.
 
 Repository: [arxhr007/Rag-Piolet](https://github.com/arxhr007/Rag-Piolet)
 
-For the recorded demo, I am using the example dataset at `examples/ragpilot_full_spectrum_test_data.txt`. You can also give RAGPilot a website URL to scrape recursively, or upload any supported file format such as PDF, DOCX, TXT, MD, CSV, or XLSX.
+In the first demo, I use the example dataset at `examples/ragpilot_full_spectrum_test_data.txt`. In the second demo, I use recursive web scraping on `https://sahrdaya.ac.in/`. These are only demo examples: you can give RAGPilot any website URL you want, or upload any supported file format such as PDF, DOCX, TXT, MD, CSV, or XLSX.
 
-The video also shows how the user will see the final RAG chatbot experience after RAGPilot builds the adaptive retrieval system.
+The demos also show how the user will see the final RAG chatbot experience after RAGPilot builds the adaptive retrieval system.
 
 ## Screenshots
 

@@ -21,7 +21,7 @@ export async function uploadFiles(files: FileList): Promise<IngestResponse> {
   );
 }
 
-export async function ingestUrl(url: string, maxPages: number, usePlaywright = false): Promise<IngestResponse> {
+export async function ingestUrl(url: string, maxPages: number, usePlaywright = true): Promise<IngestResponse> {
   return parse<IngestResponse>(
     await fetch(`${API_BASE}/api/ingest/url`, {
       method: "POST",

@@ -306,7 +306,7 @@ export default function App() {
   const [answer, setAnswer] = useState<ChatResponse | null>(null);
   const [url, setUrl] = useState("");
   const [maxPages, setMaxPages] = useState(4);
-  const [usePlaywright, setUsePlaywright] = useState(false);
+  const [usePlaywright, setUsePlaywright] = useState(true);
   const [question, setQuestion] = useState("");
   const [routeOverride, setRouteOverride] = useState<RouteOverride>("auto");
   const [busy, setBusy] = useState(false);

@@ -119,4 +119,4 @@ class ChatResponse(BaseModel):
 class UrlIngestRequest(BaseModel):
     url: str
     max_pages: int = 8
-    use_playwright: bool = False
+    use_playwright: bool = True
