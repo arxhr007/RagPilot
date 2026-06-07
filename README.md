@@ -74,26 +74,32 @@ Codex and OpenAI were used throughout the build:
 
 ## Demo
 
-Demo or pitch video link: _Add link here._
+Demo / pitch video: [Watch on YouTube](https://youtu.be/NXhBrgB6OyE)
+
+For the recorded demo, I am using the example dataset at `examples/ragpilot_full_spectrum_test_data.txt`. You can also give RAGPilot a website URL to scrape recursively, or upload any supported file format such as PDF, DOCX, TXT, MD, CSV, or XLSX.
 
 Suggested recording flow:
 
-1. Upload `examples/big_universal_ragpilot_test_data.txt`.
+1. Upload `examples/ragpilot_full_spectrum_test_data.txt`.
 2. Show the RAG Method Map, Context Budget, SQL Evidence, and Graph RAG panels.
 3. Ask:
-   - `Who is the CEO of Omniverse Labs?`
-   - `Which products depend on BeaconAI?`
+   - `Who is the CEO of AsterCloud Research Collective?`
+   - `Which products depend on GuardRail?`
    - `How many active products are listed?`
    - `Summarize the onboarding policy for new engineers.`
 4. Open the clean `/chat` page and ask one final question.
 
 ## Screenshots
 
-Add screenshots here:
+![RAGPilot demo screenshot 1](demo/demo%20(1).png)
 
-- Dashboard screenshot: _Add image/link here._
-- Clean chatbot screenshot: _Add image/link here._
-- Graph RAG visualization screenshot: _Add image/link here._
+![RAGPilot demo screenshot 2](demo/demo%20(2).png)
+
+![RAGPilot demo screenshot 3](demo/demo%20(3).png)
+
+![RAGPilot demo screenshot 4](demo/demo%20(4).png)
+
+![RAGPilot demo screenshot 5](demo/demo%20(5).png)
 
 ## Live / Hosted Link
 
