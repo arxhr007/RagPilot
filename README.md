@@ -65,13 +65,13 @@ The dashboard is mainly for developers and judges. It exposes what is happening 
 
 Codex and OpenAI were used throughout the build:
 
-- Ideation: refined RAGPilot from a basic RAG app into a universal adaptive Multi-RAG orchestrator.
-- Architecture planning: designed ingestion, segmentation, retrieval routing, SQL RAG, graph RAG, keyword RAG, hierarchical RAG, and hybrid fusion.
-- Code generation: implemented FastAPI endpoints, React dashboard panels, clean chatbot route, web scraping, tests, and UI styling.
-- Debugging: fixed blank page issues, CORS/import problems, wrong retrieval routing, SQL/graph display issues, and website crawler behavior.
-- Testing: added backend tests for routing, ingestion, SQL guardrails, answer validation, graph routing, casual chat, and web scraping.
-- Documentation: generated setup notes, demo guidance, and this README.
-- API integration: used OpenAI for grounded answer synthesis, embeddings, SQL generation, and optional ingestion-time RAG classification.
+- Ideation: Codex with GPT-5 medium reasoning was used to refine RAGPilot from a basic RAG app into a universal adaptive Multi-RAG orchestrator.
+- Architecture planning: Codex with GPT-5 high reasoning was used to design ingestion, segmentation, retrieval routing, SQL RAG, graph RAG, keyword RAG, hierarchical RAG, and hybrid fusion.
+- Code generation: Codex with GPT-5 medium reasoning was used to implement FastAPI endpoints, React dashboard panels, the clean chatbot route, web scraping, tests, and UI styling.
+- Debugging: Codex with GPT-5 high reasoning was used to fix blank page issues, CORS/import problems, wrong retrieval routing, SQL/graph display issues, and website crawler behavior.
+- Testing: Codex with GPT-5 medium reasoning was used to add backend tests for routing, ingestion, SQL guardrails, answer validation, graph routing, casual chat, and web scraping.
+- Documentation: Codex with GPT-5 low reasoning was used for README cleanup, setup notes, demo guidance, and submission wording.
+- API integration: OpenAI models were used by the app for grounded answer synthesis, embeddings, SQL generation, and optional ingestion-time RAG classification.
 
 ## Demo
 
