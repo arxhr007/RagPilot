@@ -8,7 +8,7 @@ RAGPilot is built around a simple idea: instead of using a powerful LLM with a h
 
 ## Problem Statement
 
-Most RAG demos treat every dataset like plain text. That breaks down when the uploaded data contains tables, role records, IDs, long policies, websites, product specs, event schedules, contacts, and relationship-heavy information. A single retrieval method wastes tokens, misses exact facts, and often gives irrelevant answers.
+Most RAG treat every dataset like plain text. That breaks down when the uploaded data contains tables, role records, IDs, long policies, websites, product specs, event schedules, contacts, and relationship-heavy information. A single retrieval method wastes tokens, misses exact facts, and often gives irrelevant answers.
 
 Traditional RAG often retrieves large chunks of raw text and pushes them into a large-context, expensive model. This burns tokens even when the question only needs one table row, one exact ID, one relationship, or one small paragraph.
 
@@ -35,6 +35,8 @@ The system combines:
 
 The result is a grounded answer with citations, route confidence, retrievers used, generated SQL when relevant, graph visualization, and estimated context/token savings.
 
+The dashboard is mainly for developers and judges. It exposes what is happening under the hood: how the data was segmented, which RAG methods were selected, what evidence was retrieved, what SQL was generated, and how much context was saved before the final answer reached the chatbot experience.
+
 ## Features
 
 - Universal file ingestion for PDF, DOCX, TXT, MD, CSV, XLSX, and website URLs.
@@ -55,10 +57,9 @@ The result is a grounded answer with citations, route confidence, retrievers use
 - Frontend: React, Vite, TypeScript, Lucide React, custom blue pixel-grid UI.
 - Backend: FastAPI, Python, LangGraph orchestration.
 - Database: SQLite for structured/table RAG, ChromaDB for vector storage when OpenAI embeddings are available.
-- APIs: OpenAI API for chat synthesis, embeddings, SQL generation, and optional RAG classification.
+- APIs: OpenAI API for chat synthesis, embeddings, SQL generation, and  RAG classification.
 - Scraping: Requests, BeautifulSoup, optional Playwright.
 - Testing: Pytest, frontend production build through Vite.
-- Hosting: Local-first MVP. Hosted/live link can be added when deployed.
 
 ## Codex / OpenAI Usage
 
@@ -74,20 +75,15 @@ Codex and OpenAI were used throughout the build:
 
 ## Demo
 
+[![RAGPilot demo video](https://img.youtube.com/vi/NXhBrgB6OyE/maxresdefault.jpg)](https://youtu.be/NXhBrgB6OyE)
+
 Demo / pitch video: [Watch on YouTube](https://youtu.be/NXhBrgB6OyE)
+
+Repository: [arxhr007/Rag-Piolet](https://github.com/arxhr007/Rag-Piolet)
 
 For the recorded demo, I am using the example dataset at `examples/ragpilot_full_spectrum_test_data.txt`. You can also give RAGPilot a website URL to scrape recursively, or upload any supported file format such as PDF, DOCX, TXT, MD, CSV, or XLSX.
 
-Suggested recording flow:
-
-1. Upload `examples/ragpilot_full_spectrum_test_data.txt`.
-2. Show the RAG Method Map, Context Budget, SQL Evidence, and Graph RAG panels.
-3. Ask:
-   - `Who is the CEO of AsterCloud Research Collective?`
-   - `Which products depend on GuardRail?`
-   - `How many active products are listed?`
-   - `Summarize the onboarding policy for new engineers.`
-4. Open the clean `/chat` page and ask one final question.
+The video also shows how the user will see the final RAG chatbot experience after RAGPilot builds the adaptive retrieval system.
 
 ## Screenshots
 
@@ -101,16 +97,12 @@ Suggested recording flow:
 
 ![RAGPilot demo screenshot 5](demo/demo%20(5).png)
 
-## Live / Hosted Link
-
-Live link: _Add hosted URL here if available._
-
 ## How to Run Locally
 
 Clone the repository:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/arxhr007/Rag-Piolet.git
 cd ragpilot
 ```
 
@@ -184,5 +176,4 @@ npm run build
 
 ## Repository Notes
 
-- Previous README content was moved to `docs/original-readme.md`.
 - Additional docs are available in `docs/architecture.md`, `docs/setup.md`, `docs/demo.md`, and `docs/submission.md`.
