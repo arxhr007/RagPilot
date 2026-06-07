@@ -35,4 +35,4 @@ flowchart LR
 
 ## Web Ingestion
 
-The existing `scraper.py` remains the source of the web crawler behavior. `backend/app/ingestion/web.py` adapts it into normalized ingestion records and chunks so website content works like every other source.
+`backend/app/ingestion/web.py` is the source of truth for recursive website ingestion. The root `scraper.py` file is only a small CLI wrapper around that module for standalone crawler testing.
