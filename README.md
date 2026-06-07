@@ -75,9 +75,9 @@ Codex and OpenAI were used throughout the build:
 
 ## Demo
 
-[![RAGPilot demo video](https://img.youtube.com/vi/NXhBrgB6OyE/maxresdefault.jpg)](https://youtu.be/NXhBrgB6OyE)
+[![Watch the RAGPilot demo on YouTube](https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/NXhBrgB6OyE)
 
-Demo / pitch video: [Watch on YouTube](https://youtu.be/NXhBrgB6OyE)
+Demo / pitch video: [Click here to watch the RAGPilot demo on YouTube](https://youtu.be/NXhBrgB6OyE)
 
 Repository: [arxhr007/Rag-Piolet](https://github.com/arxhr007/Rag-Piolet)
 
@@ -176,4 +176,4 @@ npm run build
 
 ## Repository Notes
 
-- Additional docs are available in `docs/architecture.md`, `docs/setup.md`, `docs/demo.md`, and `docs/submission.md`.
+- Additional docs are available in `docs/architecture.md`, `docs/setup.md`, and `docs/demo.md`.
