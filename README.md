@@ -16,6 +16,8 @@ Traditional RAG often retrieves large chunks of raw text and pushes them into a 
 
 Usually, to solve this properly, a RAG developer has to manually study the full dataset, understand which parts are tables, which parts are narrative text, which parts are exact lookup data, which parts contain relationships, then choose the right RAG method and build a custom system around it. That process is slow, domain-specific, and hard to repeat for every new dataset.
 
+At the same time, new RAG approaches keep appearing, such as vectorless RAG, SQL-based RAG, graph RAG, keyword RAG, hierarchical RAG, and hybrid retrieval. It is hard for developers and teams to keep up with every method, understand when each one should be used, and rebuild their pipeline whenever the data or retrieval strategy changes.
+
 RAGPilot solves the problem of choosing the right retrieval method automatically for each kind of data while keeping the answer grounded, explainable, and token-efficient.
 
 ```mermaid
