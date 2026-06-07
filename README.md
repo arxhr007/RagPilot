@@ -4,6 +4,8 @@
 
 RAGPilot is a universal Adaptive Multi-RAG Orchestrator. It ingests mixed data such as PDFs, DOCX files, TXT/MD files, CSV/XLSX tables, and websites, then decides which retrieval strategy each part of the data needs. The app provides a judge-friendly dashboard plus a clean final chatbot page for grounded answers.
 
+RAGPilot is built for developers, teams, students, researchers, and organizations that need to turn messy private data into reliable AI answers without manually designing a custom RAG pipeline for every new dataset.
+
 RAGPilot is built around a simple idea: instead of using a powerful LLM with a huge context window for RAG, which burns a lot of tokens and becomes expensive fast, we can get similar grounded results using a smaller and cheaper LLM with a much smaller context window. RAGPilot makes the whole RAG system cheaper by selecting the right RAG model for each type of data and then sending the right evidence to the LLM model.
 
 ## Problem Statement
