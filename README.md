@@ -16,6 +16,21 @@ Usually, to solve this properly, a RAG developer has to manually study the full 
 
 RAGPilot solves the problem of choosing the right retrieval method automatically for each kind of data while keeping the answer grounded, explainable, and token-efficient.
 
+```mermaid
+flowchart TD
+    A["Messy real-world data<br/>PDFs, websites, tables, policies, IDs, people, events"] --> B["Traditional RAG treats everything as plain text"]
+    B --> C["One retriever pulls large chunks"]
+    C --> D["Large-context LLM receives too much raw data"]
+    D --> E["High token cost"]
+    D --> F["Weak exact lookup and table reasoning"]
+    D --> G["Missed relationships and poor grounding"]
+    E --> H["RAG becomes expensive and hard to scale"]
+    F --> H
+    G --> H
+    I["Developer manually studies the dataset"] --> J["Custom domain-specific RAG pipeline"]
+    J --> H
+```
+
 ## Solution
 
 RAGPilot analyzes uploaded data, segments it into meaningful regions, classifies each segment into the best RAG method, indexes the data, and routes each user question to the right retriever.
@@ -36,6 +51,29 @@ The system combines:
 The result is a grounded answer with citations, route confidence, retrievers used, generated SQL when relevant, graph visualization, and estimated context/token savings.
 
 The dashboard is mainly for developers and judges. It exposes what is happening under the hood: how the data was segmented, which RAG methods were selected, what evidence was retrieved, what SQL was generated, and how much context was saved before the final answer reached the chatbot experience.
+
+```mermaid
+flowchart TD
+    A["Upload files or recursively scrape a website"] --> B["Clean and segment dataset"]
+    B --> C["Classify every segment by best RAG method"]
+    C --> D1["Semantic RAG<br/>Narrative facts"]
+    C --> D2["SQL RAG<br/>Tables and reliable records"]
+    C --> D3["Graph RAG<br/>Relationships and dependencies"]
+    C --> D4["Keyword/BM25 RAG<br/>Names, IDs, acronyms, contacts"]
+    C --> D5["Hierarchical RAG<br/>Long sections and policies"]
+    C --> D6["Hybrid Fusion<br/>Mixed questions needing multiple retrievers"]
+    D1 --> E["Understand user question"]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    D5 --> E
+    D6 --> E
+    E --> F["Route, retrieve, fuse, and rerank evidence"]
+    F --> G["Tiny grounded evidence pack"]
+    G --> H["Smaller cheaper LLM"]
+    H --> I["Natural-language answer"]
+    I --> J["Citations, SQL, graph evidence, validation, and token savings"]
+```
 
 ## Features
 
