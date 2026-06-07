@@ -117,6 +117,8 @@ Codex and OpenAI were used throughout the build:
 
 ## Demo
 
+### Videos :
+
 [![Watch the RAGPilot file upload demo on YouTube](https://img.shields.io/badge/File%20Upload%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/NXhBrgB6OyE)
 
 [![Watch the RAGPilot web scraping demo on YouTube](https://img.shields.io/badge/Web%20Scraping%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/qPvQ0DipTRg)
