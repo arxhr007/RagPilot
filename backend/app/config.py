@@ -20,7 +20,7 @@ def _load_dotenv() -> None:
 
 
 _load_dotenv()
-DATA_DIR = Path(os.getenv("RAGX_DATA_DIR", PROJECT_ROOT / "data"))
+DATA_DIR = Path(os.getenv("RAGPILOT_DATA_DIR", PROJECT_ROOT / "data"))
 UPLOAD_DIR = DATA_DIR / "uploads"
 VECTOR_DIR = DATA_DIR / "vectors"
 SQLITE_DIR = DATA_DIR / "sqlite"

@@ -204,8 +204,8 @@ def test_casual_chat_skips_retrieval():
 
 
 def test_big_universal_fixture_exercises_all_rag_modes():
-    text = Path("examples/big_universal_ragx_test_data.txt").read_text(encoding="utf-8")
-    segments = classify_segments_for_rag(segment_text(text, "big_universal_ragx_test_data.txt", "big"), use_openai=False)
+    text = Path("examples/big_universal_ragpilot_test_data.txt").read_text(encoding="utf-8")
+    segments = classify_segments_for_rag(segment_text(text, "big_universal_ragpilot_test_data.txt", "big"), use_openai=False)
     modes = {segment.rag_module for segment in segments}
     assert {"semantic", "sql", "graph", "keyword", "hierarchical"}.issubset(modes)
     assert all(segment.metadata.get("primary_rag") == segment.rag_module for segment in segments)
@@ -216,9 +216,9 @@ def test_big_universal_fixture_loads_reliable_text_tables_only(tmp_path, monkeyp
     import app.ingestion.table_extract as table_extract
 
     monkeypatch.setattr(table_extract, "SQLITE_DIR", tmp_path)
-    text = Path("examples/big_universal_ragx_test_data.txt").read_text(encoding="utf-8")
-    segments = classify_segments_for_rag(segment_text(text, "big_universal_ragx_test_data.txt", "big"), use_openai=False)
-    tables = load_text_tables("big_dataset", "big_universal_ragx_test_data.txt", segments)
+    text = Path("examples/big_universal_ragpilot_test_data.txt").read_text(encoding="utf-8")
+    segments = classify_segments_for_rag(segment_text(text, "big_universal_ragpilot_test_data.txt", "big"), use_openai=False)
+    tables = load_text_tables("big_dataset", "big_universal_ragpilot_test_data.txt", segments)
     names = " ".join(table.source_name for table in tables)
     assert len(tables) >= 5
     assert all(table.row_count >= 2 for table in tables)
@@ -239,13 +239,15 @@ def test_upload_response_includes_rag_classification_metadata(monkeypatch):
     import app.analysis.rag_classifier as rag_classifier
 
     monkeypatch.setattr(rag_classifier, "OPENAI_API_KEY", "")
-    client, dataset_id = _upload_fixture("examples/big_universal_ragx_test_data.txt")
+    client, dataset_id = _upload_fixture("examples/big_universal_ragpilot_test_data.txt")
     analysis = client.get(f"/api/datasets/{dataset_id}/analysis").json()
     assignments = analysis["method_assignments"]
     assert assignments
     assert analysis["rag_classification_summary"]["counts"]["sql"] >= 1
     assert any(item["classifier"] == "heuristic" for item in assignments)
     assert all("primary_rag" in item and "secondary_rags" in item and "signals" in item for item in assignments)
+    assert analysis["question_suggestions"]
+    assert analysis["question_suggestion_source"] in {"openai", "heuristic_fallback"}
 
 
 def test_web_ingestion_recursively_crawls_same_domain(monkeypatch):

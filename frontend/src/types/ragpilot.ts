@@ -59,6 +59,8 @@ export interface DatasetAnalysis {
     classifier_sources?: Record<string, number>;
     warnings?: string[];
   };
+  question_suggestions?: string[];
+  question_suggestion_source?: string;
   token_metrics?: {
     estimated_dataset_tokens?: number;
     estimated_chunk_count?: number;

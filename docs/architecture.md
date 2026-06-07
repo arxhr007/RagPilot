@@ -1,6 +1,6 @@
-# RAGX Architecture
+# RAGPilot Architecture
 
-RAGX composes retrieval modules from dataset characteristics instead of generating a codebase dynamically.
+RAGPilot composes retrieval modules from dataset characteristics instead of generating a codebase dynamically.
 
 ## Dataset Flow
 

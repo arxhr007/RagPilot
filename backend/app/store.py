@@ -31,13 +31,15 @@ class Dataset:
     graph: dict[str, Any] = field(default_factory=lambda: {"nodes": [], "edges": []})
     analysis: DatasetAnalysis | None = None
     architecture: Architecture | None = None
+    question_suggestions: list[str] = field(default_factory=list)
+    question_suggestion_source: str = ""
 
 
 class DatasetStore:
     def __init__(self) -> None:
         self.datasets: dict[str, Dataset] = {}
 
-    def create(self, name: str = "RAGX Dataset") -> Dataset:
+    def create(self, name: str = "RAGPilot Dataset") -> Dataset:
         dataset = Dataset(id=str(uuid4()), name=name)
         self.datasets[dataset.id] = dataset
         return dataset

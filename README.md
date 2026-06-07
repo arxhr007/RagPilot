@@ -1,72 +1,182 @@
-# RAGX
+# RAGPilot
 
-RAGX is a hackathon-ready Adaptive Multi-RAG Orchestrator. It accepts mixed inputs, analyzes their structure, selects the best retrieval path, and answers questions with route explanations, citations, generated SQL, and a lightweight graph view.
+## Overview
 
-This is intentionally not a "chat with PDFs" clone. RAGX composes reusable retrieval modules:
+RAGPilot is a universal Adaptive Multi-RAG Orchestrator. It ingests mixed data such as PDFs, DOCX files, TXT/MD files, CSV/XLSX tables, and websites, then decides which retrieval strategy each part of the data needs. The app provides a judge-friendly dashboard plus a clean final chatbot page for grounded answers.
 
-- Semantic RAG for PDFs, DOCX, Markdown, text, and website content.
-- SQL RAG for CSV/XLSX analytical questions.
-- Graph-style inspection for entity-heavy or relationship-style data.
-- Hybrid routing when a dataset mixes documents, tables, and websites.
+RAGPilot is built around a simple idea: instead of using a powerful LLM with a huge context window for RAG, which burns a lot of tokens and becomes expensive fast, we can get similar grounded results using a smaller and cheaper LLM with a much smaller context window. RAGPilot makes the whole RAG system cheaper by selecting the right RAG model for each type of data and then sending the right evidence to the LLM model.
 
-## Quick Start
+## Problem Statement
 
-Backend:
+Most RAG demos treat every dataset like plain text. That breaks down when the uploaded data contains tables, role records, IDs, long policies, websites, product specs, event schedules, contacts, and relationship-heavy information. A single retrieval method wastes tokens, misses exact facts, and often gives irrelevant answers.
 
-```powershell
+Traditional RAG often retrieves large chunks of raw text and pushes them into a large-context, expensive model. This burns tokens even when the question only needs one table row, one exact ID, one relationship, or one small paragraph.
+
+Usually, to solve this properly, a RAG developer has to manually study the full dataset, understand which parts are tables, which parts are narrative text, which parts are exact lookup data, which parts contain relationships, then choose the right RAG method and build a custom system around it. That process is slow, domain-specific, and hard to repeat for every new dataset.
+
+RAGPilot solves the problem of choosing the right retrieval method automatically for each kind of data while keeping the answer grounded, explainable, and token-efficient.
+
+## Solution
+
+RAGPilot analyzes uploaded data, segments it into meaningful regions, classifies each segment into the best RAG method, indexes the data, and routes each user question to the right retriever.
+
+We achieve this by replacing the traditional method of `big context window + lots of raw retrieved text + expensive LLM` with `dataset analysis + smart RAG routing + tiny evidence pack + smaller cheaper LLM`.
+
+RAGPilot also replaces the manual work of a RAG developer studying huge data and hand-designing a custom RAG pipeline. The RAGPilot AI automatically inspects the dataset, decides which RAG method each region needs, builds the retrieval workflow, and explains why each method was selected.
+
+The system combines:
+
+- Semantic RAG for narrative and factual text.
+- SQL RAG for CSV/XLSX and reliable text-derived tables.
+- Graph RAG for entity relationships and dependencies.
+- Keyword/BM25 RAG for exact names, IDs, acronyms, contacts, and codes.
+- Hierarchical RAG for long parent-child sections.
+- Hybrid Fusion when a question needs multiple retrievers.
+
+The result is a grounded answer with citations, route confidence, retrievers used, generated SQL when relevant, graph visualization, and estimated context/token savings.
+
+## Features
+
+- Universal file ingestion for PDF, DOCX, TXT, MD, CSV, XLSX, and website URLs.
+- Recursive website scraping with optional Playwright support for JavaScript-heavy pages.
+- AI-assisted and heuristic ingestion-time classification of which data should use which RAG method.
+- LLM-generated custom question suggestions based on the uploaded dataset, with fallback suggestions when OpenAI is unavailable.
+- Adaptive query routing across semantic, SQL, graph, keyword, hierarchical, and hybrid RAG.
+- Natural-language answers with citations, validation status, route confidence, and evidence.
+- SQL RAG with visible generated SQL and result rows.
+- Graph RAG visualization showing extracted entities and relationships.
+- Token/context budget panel showing estimated dataset tokens, retrieved evidence tokens, and saved context.
+- Clean `/chat` page that behaves like the final user-facing chatbot.
+- Casual-chat detection so random messages like `hi` do not trigger irrelevant retrieval.
+- Large fictional test fixture in `examples/big_universal_ragpilot_test_data.txt` for demoing all RAG modes.
+
+## Tech Stack
+
+- Frontend: React, Vite, TypeScript, Lucide React, custom blue pixel-grid UI.
+- Backend: FastAPI, Python, LangGraph orchestration.
+- Database: SQLite for structured/table RAG, ChromaDB for vector storage when OpenAI embeddings are available.
+- APIs: OpenAI API for chat synthesis, embeddings, SQL generation, and optional RAG classification.
+- Scraping: Requests, BeautifulSoup, optional Playwright.
+- Testing: Pytest, frontend production build through Vite.
+- Hosting: Local-first MVP. Hosted/live link can be added when deployed.
+
+## Codex / OpenAI Usage
+
+Codex and OpenAI were used throughout the build:
+
+- Ideation: refined RAGPilot from a basic RAG app into a universal adaptive Multi-RAG orchestrator.
+- Architecture planning: designed ingestion, segmentation, retrieval routing, SQL RAG, graph RAG, keyword RAG, hierarchical RAG, and hybrid fusion.
+- Code generation: implemented FastAPI endpoints, React dashboard panels, clean chatbot route, web scraping, tests, and UI styling.
+- Debugging: fixed blank page issues, CORS/import problems, wrong retrieval routing, SQL/graph display issues, and website crawler behavior.
+- Testing: added backend tests for routing, ingestion, SQL guardrails, answer validation, graph routing, casual chat, and web scraping.
+- Documentation: generated setup notes, demo guidance, and this README.
+- API integration: used OpenAI for grounded answer synthesis, embeddings, SQL generation, and optional ingestion-time RAG classification.
+
+## Demo
+
+Demo or pitch video link: _Add link here._
+
+Suggested recording flow:
+
+1. Upload `examples/big_universal_ragpilot_test_data.txt`.
+2. Show the RAG Method Map, Context Budget, SQL Evidence, and Graph RAG panels.
+3. Ask:
+   - `Who is the CEO of Omniverse Labs?`
+   - `Which products depend on BeaconAI?`
+   - `How many active products are listed?`
+   - `Summarize the onboarding policy for new engineers.`
+4. Open the clean `/chat` page and ask one final question.
+
+## Screenshots
+
+Add screenshots here:
+
+- Dashboard screenshot: _Add image/link here._
+- Clean chatbot screenshot: _Add image/link here._
+- Graph RAG visualization screenshot: _Add image/link here._
+
+## Live / Hosted Link
+
+Live link: _Add hosted URL here if available._
+
+## How to Run Locally
+
+Clone the repository:
+
+```bash
+git clone <repo-url>
+cd ragpilot
+```
+
+Create a backend environment:
+
+```bash
 cd backend
 python -m venv .venv
+```
+
+Activate the environment on Windows PowerShell:
+
+```powershell
 .venv\Scripts\Activate.ps1
+```
+
+Install backend dependencies:
+
+```bash
 pip install -r requirements.txt
-$env:OPENAI_API_KEY="your_key_here"
+```
+
+Install Playwright browser support if you want JavaScript website scraping:
+
+```bash
+playwright install chromium
+```
+
+Create a `.env` file in the project root or backend folder:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_CHAT_MODEL=gpt-4o-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+```
+
+Start the backend:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-Frontend:
+Start the frontend in a second terminal:
 
-```powershell
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`.
-
-RAGX can run without `OPENAI_API_KEY` for local smoke tests by using deterministic lexical retrieval and SQL heuristics. For the strongest demo, set the key.
-
-## Demo Flow
-
-1. Upload `examples/demo_notes.md` and `examples/sales.csv`.
-2. Ask: `What is RAGX designed to do?`
-3. Ask: `What is the total revenue?`
-4. Ask: `What relationships exist between RAGX, SQL RAG, and Semantic RAG?`
-5. Ingest a small website URL with max pages set to `1` or `2`.
-
-The UI shows selected route, confidence, reasoning, source citations, generated SQL, result rows, and extracted graph entities.
-
-For the adaptive text demo, upload `examples/mixed_college_data.txt`. RAGX will segment the text, convert reliable table-like sections into SQLite tables, activate keyword lookup for person/name queries, activate graph retrieval for relationship questions, and show the selected RAG modes in the dashboard.
-
-The universal answering path also includes query normalization, extracted role/contact/event facts, reranked evidence, and answer validation. Try `who is the princiapl?`, `who is the CEO?`, `where is the event venue?`, and `which team owns the invoice endpoint?` against the fixtures in `examples/`.
-
-## Environment Variables
-
-- `OPENAI_API_KEY`: enables OpenAI chat and embeddings.
-- `OPENAI_CHAT_MODEL`: defaults to `gpt-4o-mini`.
-- `OPENAI_EMBEDDING_MODEL`: defaults to `text-embedding-3-small`.
-- `RAGX_DATA_DIR`: optional local storage directory; defaults to `backend/data`.
-
-## Repository Layout
+Open the app:
 
 ```text
-backend/app/
-  api/             FastAPI endpoints
-  ingestion/       files, tables, and refactored web scraper adapter
-  analysis/        dataset intelligence and architecture selection
-  orchestration/   LangGraph-backed deterministic flows
-  rag/             semantic, SQL, and graph modules
-frontend/src/      React dashboard
-docs/              setup, demo, architecture, submission notes
-examples/          demo files
+http://127.0.0.1:5173
 ```
 
-See `docs/` for the fuller hackathon submission notes.
+## Useful Test Commands
+
+Run backend tests:
+
+```bash
+python -m pytest backend
+```
+
+Build the frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+## Repository Notes
+
+- Previous README content was moved to `docs/original-readme.md`.
+- Additional docs are available in `docs/architecture.md`, `docs/setup.md`, `docs/demo.md`, and `docs/submission.md`.

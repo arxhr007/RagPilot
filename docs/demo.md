@@ -2,7 +2,7 @@
 
 ## Goal
 
-Show that RAGX automatically selects retrieval architecture for heterogeneous data.
+Show that RAGPilot automatically selects retrieval architecture for heterogeneous data.
 
 ## Steps
 
@@ -12,13 +12,13 @@ Show that RAGX automatically selects retrieval architecture for heterogeneous da
    - `has_tables: true`
    - `has_unstructured_text: true`
    - selected strategy: `HYBRID`
-4. Ask: `What is RAGX designed to do?`
+4. Ask: `What is RAGPilot designed to do?`
    - Expected route: Semantic.
    - Expected UI: citation in Sources.
 5. Ask: `What is the total revenue?`
    - Expected route: SQL.
    - Expected UI: generated SQLite query and result rows.
-6. Ask: `What relationships exist between RAGX, SQL RAG, and Semantic RAG?`
+6. Ask: `What relationships exist between RAGPilot, SQL RAG, and Semantic RAG?`
    - Expected route: Graph.
    - Expected UI: graph entities and semantic fallback answer.
 7. Ingest a URL with max pages set to `1`.

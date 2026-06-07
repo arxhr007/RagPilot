@@ -13,7 +13,7 @@ from app.ingestion.text import chunks_from_text
 from app.models.schemas import IngestedChunk
 
 
-USER_AGENT = "RAGX-WebIngest/1.0 (+local hackathon crawler)"
+USER_AGENT = "RAGPilot-WebIngest/1.0 (+local hackathon crawler)"
 TIMEOUT = 12
 SKIP_EXTENSIONS = (
     ".css", ".js", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".png", ".jpg", ".jpeg",

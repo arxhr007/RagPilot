@@ -4,6 +4,7 @@ from collections import Counter
 
 from app.models.schemas import Architecture, DatasetAnalysis
 from app.analysis.rag_classifier import classification_counts
+from app.analysis.suggestions import generate_question_suggestions
 from app.store import Dataset
 
 
@@ -102,6 +103,8 @@ def analyze_dataset(dataset: Dataset) -> DatasetAnalysis:
         for table in dataset.tables
     )
     estimated_dataset_tokens = max(1, (max(dataset_chars, segment_chars) + table_chars + 3) // 4) if (dataset_chars or segment_chars or table_chars) else 0
+    if not dataset.question_suggestions and (dataset.segments or dataset.tables or dataset.chunks):
+        dataset.question_suggestions, dataset.question_suggestion_source = generate_question_suggestions(dataset)
 
     return DatasetAnalysis(
         dataset_id=dataset.id,
@@ -145,6 +148,8 @@ def analyze_dataset(dataset: Dataset) -> DatasetAnalysis:
                 "SQL is only activated for CSV/XLSX inputs or high-confidence repeated table-like text.",
             ],
         },
+        question_suggestions=dataset.question_suggestions,
+        question_suggestion_source=dataset.question_suggestion_source,
         token_metrics={
             "estimated_dataset_tokens": estimated_dataset_tokens,
             "estimated_chunk_count": len(dataset.chunks),
@@ -178,5 +183,5 @@ def build_architecture(dataset: Dataset) -> Architecture:
             "route_query",
             "synthesize_answer",
         ],
-        explanation="RAGX selected this architecture from detected modality, table presence, and entity relationships.",
+        explanation="RAGPilot selected this architecture from detected modality, table presence, and entity relationships.",
     )

@@ -149,7 +149,7 @@ SAHRDAYA_ROUTES = [
     '/ptwa/meeting-minutes', '/ptwa/reports',
     '/ragging', '/ragging/activities', '/ragging/constitution', '/ragging/duties-and-responsibilities',
     '/ragging/meeting-minutes',
-    '/ragx', '/research',
+    '/RAGPilot', '/research',
     '/scholarships', '/scholarships/available-scholarships', '/scholarships/constitution',
     '/scholarships/duties-and-responsibilities', '/scholarships/winners',
     '/scst', '/scst/constitution', '/scst/duties-and-responsibilities', '/scst/meeting-minutes',

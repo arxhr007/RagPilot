@@ -10,7 +10,7 @@ from app.config import ensure_data_dirs
 ensure_data_dirs()
 
 app = FastAPI(
-    title="RAGX Adaptive Multi-RAG Orchestrator",
+    title="RAGPilot Adaptive Multi-RAG Orchestrator",
     description="Hackathon MVP for automatic RAG architecture selection and routing.",
     version="0.1.0",
 )
@@ -28,4 +28,4 @@ app.include_router(router)
 
 @app.get("/")
 async def root():
-    return {"name": "RAGX", "status": "ready"}
+    return {"name": "RAGPilot", "status": "ready"}

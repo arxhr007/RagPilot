@@ -1,6 +1,6 @@
-# RAGX Demo Notes
+# RAGPilot Demo Notes
 
-RAGX is an Adaptive Multi-RAG Orchestrator. It analyzes heterogeneous datasets and selects the right retrieval architecture for each part of the data.
+RAGPilot is an Adaptive Multi-RAG Orchestrator. It analyzes heterogeneous datasets and selects the right retrieval architecture for each part of the data.
 
 Semantic RAG handles unstructured content such as PDF reports, DOCX documents, Markdown notes, website pages, and plain text.
 

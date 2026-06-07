@@ -1,6 +1,6 @@
 OMNIVERSE INNOVATION FESTIVAL AND COMPANY KNOWLEDGE BASE
 
-Omniverse Labs is a fictional company that runs an annual event called NovaCon. This single dataset is intentionally mixed so RAGX can activate semantic RAG, SQL RAG, graph RAG, keyword/BM25 lookup, hierarchical section retrieval, and hybrid fusion.
+Omniverse Labs is a fictional company that runs an annual event called NovaCon. This single dataset is intentionally mixed so RAGPilot can activate semantic RAG, SQL RAG, graph RAG, keyword/BM25 lookup, hierarchical section retrieval, and hybrid fusion.
 
 LEADERSHIP FACTS
 CEO: Maya Iyer

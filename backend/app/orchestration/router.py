@@ -205,7 +205,7 @@ def answer_question(dataset: Dataset, question: str, route_override: str = "auto
 
     answer = "\n\n".join(part for part in answer_parts if part).strip()
     if not answer:
-        answer = "RAGX needs at least one ingested document, table, or URL before it can answer grounded questions."
+        answer = "RAGPilot needs at least one ingested document, table, or URL before it can answer grounded questions."
         answer_confidence = 0.0
 
     validation = validate_answer(understood, answer, reranked_sources, fact_match, answer_confidence)

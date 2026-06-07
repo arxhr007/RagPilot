@@ -2,7 +2,7 @@
 
 ## Product Positioning
 
-RAGX is an autonomous retrieval architecture orchestrator for heterogeneous enterprise knowledge.
+RAGPilot is an autonomous retrieval architecture orchestrator for heterogeneous enterprise knowledge.
 
 ## What Works
 

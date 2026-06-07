@@ -1,1 +1,1 @@
-"""RAGX backend package."""
+"""RAGPilot backend package."""

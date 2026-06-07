@@ -88,7 +88,7 @@ class SemanticIndex:
 
             client = chromadb.PersistentClient(path=str(VECTOR_DIR))
             collection = client.get_or_create_collection(
-                f"ragx_{dataset_id.replace('-', '_')}",
+                f"RAGPilot_{dataset_id.replace('-', '_')}",
                 embedding_function=OpenAIEmbeddingFunction(
                     api_key=OPENAI_API_KEY,
                     model_name=OPENAI_EMBEDDING_MODEL,
@@ -119,7 +119,7 @@ class SemanticIndex:
 
             client = chromadb.PersistentClient(path=str(VECTOR_DIR))
             collection = client.get_collection(
-                f"ragx_{dataset_id.replace('-', '_')}",
+                f"RAGPilot_{dataset_id.replace('-', '_')}",
                 embedding_function=OpenAIEmbeddingFunction(
                     api_key=OPENAI_API_KEY,
                     model_name=OPENAI_EMBEDDING_MODEL,

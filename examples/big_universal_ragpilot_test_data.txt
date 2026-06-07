@@ -1,6 +1,6 @@
-# BIG UNIVERSAL RAGX TEST DATASET
+# BIG UNIVERSAL RAGPilot TEST DATASET
 
-This is a fictional mixed-domain dataset for testing adaptive Multi-RAG behavior. It combines company knowledge, product records, event schedules, system dependency notes, support contacts, policy documents, exact identifiers, and noisy prose. The goal is to make RAGX classify regions into semantic RAG, SQL RAG, graph RAG, keyword/BM25 RAG, hierarchical/section RAG, and hybrid fusion.
+This is a fictional mixed-domain dataset for testing adaptive Multi-RAG behavior. It combines company knowledge, product records, event schedules, system dependency notes, support contacts, policy documents, exact identifiers, and noisy prose. The goal is to make RAGPilot classify regions into semantic RAG, SQL RAG, graph RAG, keyword/BM25 RAG, hierarchical/section RAG, and hybrid fusion.
 
 ## COMPANY OVERVIEW
 

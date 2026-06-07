@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { AnimatedGrid } from "./components/AnimatedGrid";
 import { chat, ingestUrl, uploadFiles } from "./services/api";
-import type { Architecture, ChatResponse, DatasetAnalysis, IngestResponse, RouteOverride } from "./types/ragx";
+import type { Architecture, ChatResponse, DatasetAnalysis, IngestResponse, RouteOverride } from "./types/ragpilot";
 import "./styles.css";
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
@@ -48,16 +48,33 @@ function formatNumber(value?: number) {
   return Math.round(value ?? 0).toLocaleString();
 }
 
+function formatReduction(value?: number) {
+  const reduction = Math.max(0, value ?? 0);
+  if (reduction >= 99.5) return "99%";
+  return `${formatNumber(reduction)}%`;
+}
+
+function timeLabel() {
+  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
 function contextBudget(analysis: DatasetAnalysis | null, answer: ChatResponse | null) {
   const datasetTokens = answer?.context_budget?.estimated_dataset_tokens ?? analysis?.token_metrics?.estimated_dataset_tokens ?? 0;
-  const evidenceTokens = answer?.context_budget?.estimated_evidence_tokens ?? estimateTokens(answer?.sources?.map((source) => source.text).join("\n") ?? "");
-  const savedTokens = answer?.context_budget?.estimated_saved_tokens ?? Math.max(0, datasetTokens - evidenceTokens);
-  const reduction = answer?.context_budget?.reduction_percent ?? (datasetTokens ? Math.round((savedTokens / datasetTokens) * 1000) / 10 : 0);
+  const evidenceTokens = answer
+    ? answer.context_budget?.estimated_evidence_tokens ?? estimateTokens(answer.sources?.map((source) => source.text).join("\n") ?? "")
+    : 0;
+  const savedTokens = answer && evidenceTokens > 0
+    ? answer.context_budget?.estimated_saved_tokens ?? Math.max(0, datasetTokens - evidenceTokens)
+    : 0;
+  const reduction = answer && evidenceTokens > 0 && datasetTokens
+    ? answer.context_budget?.reduction_percent ?? Math.round((savedTokens / datasetTokens) * 1000) / 10
+    : 0;
   return { datasetTokens, evidenceTokens, savedTokens, reduction };
 }
 
 function dataSuggestions(analysis: DatasetAnalysis | null) {
   if (!analysis) return [];
+  if (analysis.question_suggestions?.length) return analysis.question_suggestions.slice(0, 6);
   const suggestions: string[] = [];
   const tables = analysis.detected_tables ?? [];
   const entities = analysis.graph?.nodes ?? [];
@@ -183,7 +200,9 @@ function AnswerBlock({ answer, analysis }: { answer: ChatResponse | null; analys
       </div>
       <p className="final-answer">{answer.answer}</p>
       <p className="budget-line">
-        RAGX used ~{formatNumber(budget.evidenceTokens)} evidence tokens instead of sending ~{formatNumber(budget.datasetTokens)} raw dataset tokens.
+        {budget.evidenceTokens > 0
+          ? <>RAGPilot used ~{formatNumber(budget.evidenceTokens)} evidence tokens instead of sending ~{formatNumber(budget.datasetTokens)} raw dataset tokens.</>
+          : <>RAGPilot did not send retrieved evidence for this answer.</>}
       </p>
       <div className="route-line">
         <strong>{answer.route.toUpperCase()}</strong>
@@ -220,6 +239,7 @@ function CleanChatPage({
   busy,
   error,
   ask,
+  suggestions,
   navigate,
 }: {
   datasetId: string;
@@ -230,6 +250,7 @@ function CleanChatPage({
   busy: boolean;
   error: string;
   ask: () => void;
+  suggestions: string[];
   navigate: (path: string) => void;
 }) {
   return (
@@ -246,7 +267,7 @@ function CleanChatPage({
         </button>
       </div>
       <section className="chat-stage">
-        <h1>RAGX</h1>
+        <h1>RAGPilot</h1>
         <p>Ask anything from your uploaded dataset.</p>
         {!datasetId && <div className="chat-empty">Add data in the dashboard to start chatting.</div>}
         {error && <div className="error chat-error">{error}</div>}
@@ -263,6 +284,15 @@ function CleanChatPage({
             {busy ? <Loader2 className="spin" size={18} /> : <Send size={18} />}
           </button>
         </div>
+        {suggestions.length > 0 && (
+          <div className="chat-suggestions">
+            {suggestions.map((suggestion) => (
+              <button className="ghost-button" key={suggestion} disabled={busy} onClick={() => setQuestion(suggestion)}>
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
         <AnswerBlock answer={answer} analysis={analysis} />
       </section>
     </main>
@@ -280,6 +310,7 @@ export default function App() {
   const [question, setQuestion] = useState("");
   const [routeOverride, setRouteOverride] = useState<RouteOverride>("auto");
   const [busy, setBusy] = useState(false);
+  const [ingestLog, setIngestLog] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [page, setPage] = useState(() => window.location.pathname === "/chat" ? "/chat" : "/");
 
@@ -307,6 +338,20 @@ export default function App() {
     setAnswer(null);
   }
 
+  function pushIngestLog(message: string) {
+    setIngestLog((items) => [...items.slice(-7), `[${timeLabel()}] ${message}`]);
+  }
+
+  function summarizeIngest(res: IngestResponse) {
+    const pages = scrapedPages(res.analysis).length;
+    const tables = res.analysis.detected_tables?.length ?? 0;
+    const segments = res.analysis.segments?.length ?? 0;
+    const modes = res.analysis.rag_modes_selected?.join(", ") || res.analysis.selected_strategy;
+    if (pages) pushIngestLog(`Scraped ${pages} page(s) and extracted website text.`);
+    pushIngestLog(`Classified ${segments} segment(s), found ${tables} table(s), activated ${modes}.`);
+    pushIngestLog(`Ready. Dataset ${res.dataset_id.slice(0, 8)} is indexed for chat.`);
+  }
+
   async function run<T>(task: () => Promise<T>, onDone: (result: T) => void) {
     setBusy(true);
     setError("");
@@ -315,6 +360,25 @@ export default function App() {
       onDone(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runIngest(task: () => Promise<IngestResponse>, startMessages: string[]) {
+    setBusy(true);
+    setError("");
+    setIngestLog([]);
+    startMessages.forEach(pushIngestLog);
+    try {
+      const result = await task();
+      pushIngestLog("Response received. Building dashboard analysis.");
+      acceptIngest(result);
+      summarizeIngest(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
+      pushIngestLog(`Error: ${message}`);
     } finally {
       setBusy(false);
     }
@@ -335,6 +399,7 @@ export default function App() {
         busy={busy}
         error={error}
         ask={() => askCurrent("auto")}
+        suggestions={suggestions}
         navigate={navigate}
       />
     );
@@ -347,7 +412,7 @@ export default function App() {
         <header className="topbar">
           <div>
             <p className="eyebrow">Adaptive Multi-RAG Orchestrator</p>
-            <h1>RAGX</h1>
+            <h1>RAGPilot</h1>
           </div>
           <div className="top-actions">
             {datasetId && (
@@ -366,12 +431,12 @@ export default function App() {
           <div>
             <p className="eyebrow">Token-efficient grounded answers</p>
             <h2>Make a small LLM reason over big messy data.</h2>
-            <p>RAGX segments any upload, picks the right retrieval method, and sends only the strongest evidence into context.</p>
+            <p>RAGPilot segments any upload, selects the right RAG module for each data type, then sends the right evidence to the LLM.</p>
           </div>
           <div className="value-cards">
             <MetricCard label="Analyze Any Data" value={analysis ? formatNumber(Number(analysis.characteristics.segment_count ?? 0)) : "PDF/CSV/Web"} note="Documents, tables, websites, reports" />
             <MetricCard label="Route To The Right RAG" value={analysis ? formatNumber(analysis.rag_modes_selected.length) : "6 modes"} note="Semantic, SQL, graph, keyword, hierarchical, hybrid" />
-            <MetricCard label="Answer With Less Context" value={analysis ? `${formatNumber(budget.reduction)}%` : "Less tokens"} note="Estimated context reduction after retrieval" />
+            <MetricCard label="Answer With Less Context" value={answer ? formatReduction(budget.reduction) : "Ask first"} note="Estimated context reduction after retrieval" />
           </div>
           <div className="workflow-strip">
             {["Segment", "Classify", "Route", "Retrieve", "Synthesize", "Validate"].map((step) => <span key={step}>{step}</span>)}
@@ -389,7 +454,15 @@ export default function App() {
                 accept=".pdf,.docx,.csv,.xlsx,.xls,.txt,.md,.markdown"
                 onChange={(event) => {
                   if (!event.target.files?.length) return;
-                  run(() => uploadFiles(event.target.files!), acceptIngest);
+                  const files = Array.from(event.target.files);
+                  runIngest(
+                    () => uploadFiles(event.target.files!),
+                    [
+                      `Preparing ${files.length} file(s): ${files.map((file) => file.name).join(", ")}`,
+                      "Uploading files to FastAPI backend.",
+                      "Extracting text/tables and classifying each region into RAG methods.",
+                    ],
+                  );
                 }}
               />
               <FileUp size={22} />
@@ -407,7 +480,14 @@ export default function App() {
                 onChange={(event) => setMaxPages(Number(event.target.value))}
                 title="Max pages"
               />
-              <button disabled={!url || busy} onClick={() => run(() => ingestUrl(url, maxPages, usePlaywright), acceptIngest)}>
+              <button disabled={!url || busy} onClick={() => runIngest(
+                () => ingestUrl(url, maxPages, usePlaywright),
+                [
+                  `Starting recursive crawl for ${url}.`,
+                  `Target: up to ${maxPages} page(s). ${usePlaywright ? "Playwright rendering enabled." : "Requests/BeautifulSoup mode."}`,
+                  "Discovering links, extracting page text, and preparing RAG chunks.",
+                ],
+              )}>
                 {busy ? <Loader2 className="spin" size={16} /> : <Search size={16} />}
                 Ingest
               </button>
@@ -416,6 +496,15 @@ export default function App() {
               <input type="checkbox" checked={usePlaywright} onChange={(event) => setUsePlaywright(event.target.checked)} />
               <span>Use Playwright for JS-heavy pages</span>
             </label>
+            {ingestLog.length > 0 && (
+              <div className="ingest-log">
+                <div className="segment-head">
+                  <strong>Ingest Log</strong>
+                  {busy ? <span>running</span> : <span>done</span>}
+                </div>
+                {ingestLog.map((item, index) => <p key={`${item}-${index}`}>{item}</p>)}
+              </div>
+            )}
             {websitePages.length > 0 && (
               <div className="scraped-pages">
                 <div className="segment-head">
@@ -453,8 +542,8 @@ export default function App() {
             <div className="metric-grid">
               <MetricCard label="Dataset Tokens" value={`~${formatNumber(budget.datasetTokens)}`} note="Estimated raw context" />
               <MetricCard label="Evidence Tokens" value={`~${formatNumber(budget.evidenceTokens)}`} note="Retrieved for the answer" />
-              <MetricCard label="Saved Tokens" value={`~${formatNumber(budget.savedTokens)}`} note="Estimated avoided context" />
-              <MetricCard label="Reduction" value={`${formatNumber(budget.reduction)}%`} note="Small-model context focus" />
+              <MetricCard label="Saved Tokens" value={answer ? `~${formatNumber(budget.savedTokens)}` : "Ask first"} note="Estimated avoided context" />
+              <MetricCard label="Reduction" value={answer ? formatReduction(budget.reduction) : "Ask first"} note="Small-model context focus" />
             </div>
             <p className="muted">Token counts are transparent estimates using roughly four characters per token.</p>
           </Panel>
@@ -501,22 +590,6 @@ export default function App() {
                 )}
               </>
             ) : <p className="muted">Active RAG modes appear after ingestion.</p>}
-          </Panel>
-
-          <Panel title="Architecture" icon={<GitBranch size={18} />}>
-            {architecture ? (
-              <>
-                <p className="architecture-name">{architecture.name}</p>
-                <div className="modules">
-                  {architecture.modules.map((module) => (
-                    <span key={String(module.name)}>{String(module.name)} - {String(module.status)}</span>
-                  ))}
-                </div>
-                <div className="workflow">
-                  {activeNodes.map((node) => <span key={node}>{node}</span>)}
-                </div>
-              </>
-            ) : <p className="muted">RAGX will show the activated pipeline here.</p>}
           </Panel>
 
           <Panel title="RAG Method Map" icon={<Activity size={18} />}>
@@ -566,6 +639,7 @@ export default function App() {
               </button>
             </div>
             <div className="demo-questions">
+              {analysis?.question_suggestion_source && <span className="suggestion-source">Suggestions: {analysis.question_suggestion_source.replaceAll("_", " ")}</span>}
               {suggestions.map((suggestion) => (
                 <button className="ghost-button" key={suggestion} disabled={busy} onClick={() => setQuestion(suggestion)}>
                   {suggestion}
@@ -589,7 +663,7 @@ export default function App() {
                   </article>
                 ))}
               </div>
-            ) : <p className="muted">RAGX will list detected sections and selected RAG modules here.</p>}
+            ) : <p className="muted">RAGPilot will list detected sections and selected RAG modules here.</p>}
           </Panel>
 
           <Panel title="Sources" icon={<Search size={18} />}>
