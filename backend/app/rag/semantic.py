@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import Iterable
 
 from app.config import OPENAI_API_KEY, OPENAI_CHAT_MODEL, OPENAI_EMBEDDING_MODEL, VECTOR_DIR
@@ -16,11 +16,12 @@ def _tokens(text: str) -> list[str]:
     return [t.lower() for t in TOKEN_RE.findall(text)]
 
 
-def _cosine(a: Counter, b: Counter) -> float:
-    common = set(a) & set(b)
-    numerator = sum(a[t] * b[t] for t in common)
-    denom = math.sqrt(sum(v * v for v in a.values())) * math.sqrt(sum(v * v for v in b.values()))
-    return numerator / denom if denom else 0.0
+def _idf_cosine(query_counts: Counter, doc_counts: Counter, idf: dict[str, float]) -> float:
+    common = set(query_counts) & set(doc_counts)
+    numerator = sum(query_counts[t] * doc_counts[t] * (idf.get(t, 1.0) ** 2) for t in common)
+    q_norm = math.sqrt(sum((query_counts[t] * idf.get(t, 1.0)) ** 2 for t in query_counts))
+    d_norm = math.sqrt(sum((doc_counts[t] * idf.get(t, 1.0)) ** 2 for t in doc_counts))
+    return numerator / (q_norm * d_norm) if q_norm and d_norm else 0.0
 
 
 class SemanticIndex:
@@ -44,10 +45,22 @@ class SemanticIndex:
         if chroma_hits:
             return chroma_hits
 
-        query_vec = Counter(_tokens(query))
+        chunks = self._chunks.get(dataset_id, [])
+        query_counts = Counter(_tokens(query))
+        if not chunks or not query_counts:
+            return []
+
+        doc_counts = [Counter(_tokens(chunk.text)) for chunk in chunks]
+        doc_freq: defaultdict[str, int] = defaultdict(int)
+        for counts in doc_counts:
+            for term in counts:
+                doc_freq[term] += 1
+        total_docs = len(chunks)
+        idf = {term: math.log((total_docs + 1) / (freq + 0.5)) + 1 for term, freq in doc_freq.items()}
+
         scored = []
-        for chunk in self._chunks.get(dataset_id, []):
-            score = _cosine(query_vec, Counter(_tokens(chunk.text)))
+        for chunk, counts in zip(chunks, doc_counts):
+            score = _idf_cosine(query_counts, counts, idf)
             if score > 0:
                 source = chunk.source.model_copy(update={"score": round(score, 4)})
                 scored.append(source)

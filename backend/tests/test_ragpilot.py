@@ -194,6 +194,12 @@ def test_point_lookup_without_confirmed_fact_is_not_raw_dump():
     assert "I could not find" in answer["answer"]
 
 
+def test_chat_unknown_dataset_returns_404():
+    client = TestClient(app)
+    response = client.post("/api/chat", json={"dataset_id": "does-not-exist", "question": "hi"})
+    assert response.status_code == 404
+
+
 def test_casual_chat_skips_retrieval():
     client, dataset_id = _upload_fixture("examples/universal_all_rag_demo.txt")
     answer = client.post("/api/chat", json={"dataset_id": dataset_id, "question": "hi"}).json()

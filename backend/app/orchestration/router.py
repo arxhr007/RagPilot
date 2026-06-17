@@ -13,7 +13,7 @@ from app.rag.sql import execute_sql, generate_fallback_sql, generate_sql, summar
 from app.store import Dataset
 
 
-SQL_HINTS = re.compile(r"\b(total|sum|average|avg|count|how many|top|highest|lowest|min|max|revenue|sales|by|list|show|which|owner|owns|team|endpoint|product|speaker|venue)\b", re.I)
+SQL_HINTS = re.compile(r"\b(total|sum|average|avg|count|how many|top|highest|lowest|min|max|revenue|sales|owner|owns|team|endpoint)\b", re.I)
 GRAPH_HINTS = re.compile(r"\b(relationship|related|connect(?:ed|ion|s)?|dependency|depends|between|entity|graph|link(?:ed|s)?|programs?|associated|offers?)\b", re.I)
 KEYWORD_HINTS = re.compile(r"\b(who is|where is|contact|email|phone|faculty|hod|principal|department|acronym|full form)\b", re.I)
 
@@ -45,6 +45,24 @@ def classify_query(dataset: Dataset, question: str, route_override: str = "auto"
     if any(segment.rag_module == "hierarchical" for segment in dataset.segments):
         return "hierarchical", 0.79, "Broad factual question can use section-level parent context."
     return "semantic", 0.84 if dataset.chunks else 0.35, "Factual long-form phrasing is best served by semantic retrieval."
+
+
+def _normalize_scores(sources):
+    if not sources:
+        return sources
+    scores = [source.score for source in sources]
+    lo, hi = min(scores), max(scores)
+    if hi <= lo:
+        return [source.model_copy(update={"score": 1.0}) for source in sources]
+    span = hi - lo
+    return [source.model_copy(update={"score": round((source.score - lo) / span, 4)}) for source in sources]
+
+
+def _safe_execute(db_path, sql):
+    try:
+        return execute_sql(db_path, sql)
+    except Exception:
+        return []
 
 
 def _merge_sources(*groups):
@@ -145,21 +163,21 @@ def answer_question(dataset: Dataset, question: str, route_override: str = "auto
 
     if route in ("semantic", "hybrid", "graph"):
         if dataset.chunks:
-            semantic_sources = semantic_index.search(dataset.id, understood.expanded, k=12)
+            semantic_sources = _normalize_scores(semantic_index.search(dataset.id, understood.expanded, k=12))
             retrievers_used.append("semantic")
         else:
             retrievers_skipped.append({"retriever": "semantic", "reason": "No unstructured chunks are indexed."})
 
     if route in ("keyword", "hybrid"):
         if dataset.chunks:
-            keyword_sources = keyword_index.search(dataset.id, understood.expanded, k=18)
+            keyword_sources = _normalize_scores(keyword_index.search(dataset.id, understood.expanded, k=18))
             retrievers_used.append("keyword")
         else:
             retrievers_skipped.append({"retriever": "keyword", "reason": "No text chunks are indexed."})
 
     if route in ("hierarchical", "hybrid"):
         if dataset.segments:
-            hierarchical_sources = hierarchical_index.search(dataset.id, understood.expanded, k=8)
+            hierarchical_sources = _normalize_scores(hierarchical_index.search(dataset.id, understood.expanded, k=8))
             retrievers_used.append("hierarchical")
         else:
             retrievers_skipped.append({"retriever": "hierarchical", "reason": "No source segments are available."})
@@ -174,11 +192,11 @@ def answer_question(dataset: Dataset, question: str, route_override: str = "auto
     if route in ("sql", "hybrid") and dataset.tables:
         table = _best_table(dataset, understood.normalized)
         generated_sql = generate_sql(understood.normalized, table.table_name, table.columns)
-        sql_rows = execute_sql(table.db_path, generated_sql)
+        sql_rows = _safe_execute(table.db_path, generated_sql)
         if not sql_rows:
             fallback_sql = generate_fallback_sql(understood.normalized, table.table_name, table.columns)
             if fallback_sql != generated_sql:
-                fallback_rows = execute_sql(table.db_path, fallback_sql)
+                fallback_rows = _safe_execute(table.db_path, fallback_sql)
                 if fallback_rows:
                     generated_sql = fallback_sql
                     sql_rows = fallback_rows

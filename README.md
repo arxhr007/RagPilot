@@ -1,5 +1,8 @@
 # RAGPilot
 
+[![CI](https://github.com/arxhr007/RagPilot/actions/workflows/ci.yml/badge.svg)](https://github.com/arxhr007/RagPilot/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 ## Overview
 
 RAGPilot is a universal Adaptive Multi-RAG Orchestrator. It ingests mixed data such as PDFs, DOCX files, TXT/MD files, CSV/XLSX tables, and websites, then decides which retrieval strategy each part of the data needs. The app provides a judge-friendly dashboard plus a clean final chatbot page for grounded answers.
@@ -103,18 +106,6 @@ flowchart TD
 - Scraping: Requests, BeautifulSoup, optional Playwright.
 - Testing: Pytest, frontend production build through Vite.
 
-## Codex / OpenAI Usage
-
-Codex and OpenAI were used throughout the build:
-
-- Ideation: Codex with GPT-5 medium reasoning was used to refine RAGPilot from a basic RAG app into a universal adaptive Multi-RAG orchestrator.
-- Architecture planning: Codex with GPT-5 high reasoning was used to design ingestion, segmentation, retrieval routing, SQL RAG, graph RAG, keyword RAG, hierarchical RAG, and hybrid fusion.
-- Code generation: Codex with GPT-5 medium reasoning was used to implement FastAPI endpoints, React dashboard panels, the clean chatbot route, web scraping, tests, and UI styling.
-- Debugging: Codex with GPT-5 high reasoning was used to fix blank page issues, CORS/import problems, wrong retrieval routing, SQL/graph display issues, and website crawler behavior.
-- Testing: Codex with GPT-5 medium reasoning was used to add backend tests for routing, ingestion, SQL guardrails, answer validation, graph routing, casual chat, and web scraping.
-- Documentation: Codex with GPT-5 low reasoning was used for README cleanup, setup notes, demo guidance, and submission wording.
-- API integration: OpenAI models were used by the app for grounded answer synthesis, embeddings, SQL generation, and optional ingestion-time RAG classification.
-
 ## Demo
 
 ### Videos :
@@ -203,6 +194,10 @@ npm install
 npm run dev
 ```
 
+The frontend talks to `http://127.0.0.1:8000` by default. To point it at a
+different backend, copy `frontend/.env.example` to `frontend/.env` and set
+`VITE_API_BASE`.
+
 Open the app:
 
 ```text
@@ -227,3 +222,11 @@ npm run build
 ## Repository Notes
 
 - Additional docs are available in `docs/architecture.md`, `docs/setup.md`, and `docs/demo.md`.
+
+## Contributing
+
+Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local setup, how to run the tests and frontend build, and how to open a pull request.
+
+## License
+
+Released under the [MIT License](LICENSE).

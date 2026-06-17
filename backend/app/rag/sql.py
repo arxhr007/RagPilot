@@ -35,6 +35,14 @@ def is_read_only_sql(sql: str) -> bool:
     return normalized.startswith("select") and not forbidden.search(normalized)
 
 
+def _clean_sql(raw: str) -> str:
+    sql = (raw or "").strip()
+    if sql.startswith("```"):
+        sql = re.sub(r"^```[a-zA-Z]*\s*", "", sql)
+        sql = re.sub(r"\s*```$", "", sql)
+    return sql.strip().strip("`").strip()
+
+
 def generate_sql(question: str, table_name: str, columns: list[str], use_openai: bool = True) -> str:
     if OPENAI_API_KEY and use_openai:
         try:
@@ -55,7 +63,7 @@ def generate_sql(question: str, table_name: str, columns: list[str], use_openai:
                 ],
                 temperature=0,
             )
-            sql = (response.choices[0].message.content or "").strip().strip("`")
+            sql = _clean_sql(response.choices[0].message.content or "")
             if is_read_only_sql(sql):
                 return sql.rstrip(";")
         except Exception:
@@ -81,7 +89,8 @@ def generate_fallback_sql(question: str, table_name: str, columns: list[str]) ->
     for term in terms:
         if term.lower() in {"which", "what", "where", "when", "who", "is", "the", "show", "list", "team", "owns", "owner", "product", "endpoint"}:
             continue
-        like_clauses = " OR ".join(f'CAST("{column}" AS TEXT) LIKE "%{term.replace(chr(34), "")}%"' for column in columns)
+        safe_term = term.replace("'", "")
+        like_clauses = " OR ".join(f"""CAST("{column}" AS TEXT) LIKE '%{safe_term}%'""" for column in columns)
         if like_clauses:
             return f'SELECT * FROM "{table_name}" WHERE {like_clauses} LIMIT 20'
     return f'SELECT * FROM "{table_name}" LIMIT 20'
